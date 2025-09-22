@@ -26,9 +26,9 @@
   --color-amber-500: rgba(255, 152, 0, 1);
   --color-gold-400: rgba(255, 183, 77, 1);
   --color-gold-500: rgba(255, 160, 0, 1);
-  --color-whiskey-300: rgba(205, 133, 63, 0.7);
-  --color-whiskey-500: rgba(160, 82, 45, 1);
-  --color-whiskey-700: rgba(139, 69, 19, 1);
+  --color-nexus-300: rgba(205, 133, 63, 0.7);
+  --color-nexus-500: rgba(160, 82, 45, 1);
+  --color-nexus-700: rgba(139, 69, 19, 1);
 
   /* RGB versions for opacity control */
   --color-brown-600-rgb: 94, 82, 64;
@@ -39,7 +39,7 @@
   --color-red-400-rgb: 255, 84, 89;
   --color-orange-500-rgb: 168, 75, 47;
   --color-orange-400-rgb: 230, 129, 97;
-  --color-whiskey-500-rgb: 160, 82, 45;
+  --color-nexus-500-rgb: 160, 82, 45;
   --color-amber-500-rgb: 255, 152, 0;
   --color-gold-500-rgb: 255, 160, 0;
 
@@ -52,7 +52,7 @@
   --color-bg-6: rgba(249, 115, 22, 0.08); /* Light orange */
   --color-bg-7: rgba(236, 72, 153, 0.08); /* Light pink */
   --color-bg-8: rgba(6, 182, 212, 0.08); /* Light cyan */
-  --color-bg-whiskey: rgba(160, 82, 45, 0.05); /* Light whiskey */
+  --color-bg-nexus: rgba(160, 82, 45, 0.05); /* Light nexus */
 
   /* Semantic Color Tokens (Light Mode) */
   --color-background: var(--color-cream-50);
@@ -75,8 +75,8 @@
   --color-info: var(--color-slate-500);
   --color-focus-ring: rgba(var(--color-teal-500-rgb), 0.4);
   --color-select-caret: rgba(var(--color-slate-900-rgb), 0.8);
-  --color-whiskey-accent: var(--color-whiskey-500);
-  --color-whiskey-text: var(--color-whiskey-700);
+  --color-nexus-accent: var(--color-nexus-500);
+  --color-nexus-text: var(--color-nexus-700);
 
   /* Common style patterns */
   --focus-ring: 0 0 0 3px var(--color-focus-ring);
@@ -144,7 +144,7 @@
     0 4px 6px -2px rgba(0, 0, 0, 0.02);
   --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.15),
     inset 0 -1px 0 rgba(0, 0, 0, 0.03);
-  --shadow-whiskey: 0 4px 20px rgba(160, 82, 45, 0.15);
+  --shadow-nexus: 0 4px 20px rgba(160, 82, 45, 0.15);
 
   /* Animation */
   --duration-fast: 150ms;
@@ -166,7 +166,7 @@
     --color-teal-300-rgb: 50, 184, 198;
     --color-gray-300-rgb: 167, 169, 169;
     --color-gray-200-rgb: 245, 245, 245;
-    --color-whiskey-300-rgb: 205, 133, 63;
+    --color-nexus-300-rgb: 205, 133, 63;
 
     /* Background color tokens (Dark Mode) */
     --color-bg-1: rgba(29, 78, 216, 0.15); /* Dark blue */
@@ -177,7 +177,7 @@
     --color-bg-6: rgba(194, 65, 12, 0.15); /* Dark orange */
     --color-bg-7: rgba(190, 24, 93, 0.15); /* Dark pink */
     --color-bg-8: rgba(8, 145, 178, 0.15); /* Dark cyan */
-    --color-bg-whiskey: rgba(160, 82, 45, 0.1); /* Dark whiskey */
+    --color-bg-nexus: rgba(160, 82, 45, 0.1); /* Dark nexus */
 
     /* Semantic Color Tokens (Dark Mode) */
     --color-background: var(--color-charcoal-700);
@@ -204,8 +204,8 @@
     --button-border-secondary: rgba(var(--color-gray-400-rgb), 0.2);
     --color-border-secondary: rgba(var(--color-gray-400-rgb), 0.2);
     --color-select-caret: rgba(var(--color-gray-200-rgb), 0.8);
-    --color-whiskey-accent: rgba(var(--color-whiskey-300-rgb), 0.8);
-    --color-whiskey-text: var(--color-whiskey-300);
+    --color-nexus-accent: rgba(var(--color-nexus-300-rgb), 0.8);
+    --color-nexus-text: var(--color-nexus-300);
 
     /* Common style patterns - updated for dark mode */
     --focus-ring: 0 0 0 3px var(--color-focus-ring);
@@ -230,7 +230,7 @@
   --color-teal-300-rgb: 50, 184, 198;
   --color-gray-300-rgb: 167, 169, 169;
   --color-gray-200-rgb: 245, 245, 245;
-  --color-whiskey-300-rgb: 205, 133, 63;
+  --color-nexus-300-rgb: 205, 133, 63;
 
   /* Colorful background palette - Dark Mode */
   --color-bg-1: rgba(29, 78, 216, 0.15); /* Dark blue */
@@ -241,7 +241,7 @@
   --color-bg-6: rgba(194, 65, 12, 0.15); /* Dark orange */
   --color-bg-7: rgba(190, 24, 93, 0.15); /* Dark pink */
   --color-bg-8: rgba(8, 145, 178, 0.15); /* Dark cyan */
-  --color-bg-whiskey: rgba(160, 82, 45, 0.1); /* Dark whiskey */
+  --color-bg-nexus: rgba(160, 82, 45, 0.1); /* Dark nexus */
 
   /* Semantic Color Tokens (Dark Mode) */
   --color-background: var(--color-charcoal-700);
@@ -268,8 +268,8 @@
   --button-border-secondary: rgba(var(--color-gray-400-rgb), 0.2);
   --color-border-secondary: rgba(var(--color-gray-400-rgb), 0.2);
   --color-select-caret: rgba(var(--color-gray-200-rgb), 0.8);
-  --color-whiskey-accent: rgba(var(--color-whiskey-300-rgb), 0.8);
-  --color-whiskey-text: var(--color-whiskey-300);
+  --color-nexus-accent: rgba(var(--color-nexus-300-rgb), 0.8);
+  --color-nexus-text: var(--color-nexus-300);
 }
 
 /* Reset and Base Styles */
@@ -288,8 +288,8 @@ body {
   overflow-x: hidden;
 }
 
-/* Whiskey-themed animations */
-@keyframes whiskeyPour {
+/* Nexus-themed animations */
+@keyframes nexusPour {
   0% {
     height: 0%;
     opacity: 0;
@@ -303,7 +303,7 @@ body {
   }
 }
 
-@keyframes whiskeySwirl {
+@keyframes nexusSwirl {
   0% {
     transform: rotate(0deg);
   }
@@ -312,7 +312,7 @@ body {
   }
 }
 
-@keyframes whiskeyBubble {
+@keyframes nexusBubble {
   0% {
     transform: translateY(0) scale(0.5);
     opacity: 0;
@@ -326,7 +326,7 @@ body {
   }
 }
 
-@keyframes whiskeyAging {
+@keyframes nexusAging {
   0% {
     background-position: 0 0;
   }
@@ -335,7 +335,7 @@ body {
   }
 }
 
-@keyframes whiskeyDistillation {
+@keyframes nexusDistillation {
   0% {
     height: 0%;
   }
@@ -365,7 +365,7 @@ body {
   border: 1px solid var(--color-card-border);
 }
 
-.whiskey-logo {
+.nexus-logo {
   margin-bottom: var(--space-24);
 }
 
@@ -388,9 +388,9 @@ body {
   bottom: 0;
   width: 100%;
   height: 60%;
-  background: linear-gradient(to top, var(--color-whiskey-500), var(--color-amber-500));
+  background: linear-gradient(to top, var(--color-nexus-500), var(--color-amber-500));
   border-radius: 0 0 50% 50%;
-  animation: whiskeyPour 2s ease-in-out;
+  animation: nexusPour 2s ease-in-out;
 }
 
 .bubbles {
@@ -408,7 +408,7 @@ body {
   height: 6px;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 50%;
-  animation: whiskeyBubble 3s infinite;
+  animation: nexusBubble 3s infinite;
 }
 
 .bubbles::before {
@@ -432,11 +432,11 @@ body {
   filter: blur(2px);
 }
 
-.whiskey-logo h1 {
+.nexus-logo h1 {
   font-family: var(--font-family-heading);
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-whiskey-text);
+  color: var(--color-nexus-text);
   margin-bottom: var(--space-4);
   letter-spacing: 1px;
 }
@@ -482,7 +482,7 @@ body {
 .login-btn {
   width: 100%;
   padding: var(--space-12);
-  background: var(--color-whiskey-accent);
+  background: var(--color-nexus-accent);
   color: var(--color-btn-primary-text);
   border: none;
   border-radius: var(--radius-base);
@@ -499,9 +499,9 @@ body {
 }
 
 .login-btn:hover {
-  background: var(--color-whiskey-text);
+  background: var(--color-nexus-text);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-whiskey);
+  box-shadow: var(--shadow-nexus);
 }
 
 .login-btn:disabled {
@@ -562,7 +562,7 @@ body {
   gap: var(--space-32);
 }
 
-.whiskey-header-logo {
+.nexus-header-logo {
   display: flex;
   align-items: center;
   gap: var(--space-12);
@@ -586,15 +586,15 @@ body {
   bottom: 0;
   width: 100%;
   height: 60%;
-  background: linear-gradient(to top, var(--color-whiskey-500), var(--color-amber-500));
+  background: linear-gradient(to top, var(--color-nexus-500), var(--color-amber-500));
   border-radius: 0 0 50% 50%;
 }
 
-.whiskey-header-logo h2 {
+.nexus-header-logo h2 {
   font-family: var(--font-family-heading);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-whiskey-text);
+  color: var(--color-nexus-text);
   letter-spacing: 0.5px;
 }
 
@@ -617,7 +617,7 @@ body {
 }
 
 .nav-item.active {
-  color: var(--color-whiskey-text);
+  color: var(--color-nexus-text);
 }
 
 .nav-item.active::after {
@@ -627,7 +627,7 @@ body {
   left: 0;
   width: 100%;
   height: 2px;
-  background: var(--color-whiskey-accent);
+  background: var(--color-nexus-accent);
   border-radius: var(--radius-full);
 }
 
@@ -655,10 +655,10 @@ body {
   overflow: hidden;
 }
 
-.whiskey-drop {
+.nexus-drop {
   width: 16px;
   height: 16px;
-  background: var(--color-whiskey-accent);
+  background: var(--color-nexus-accent);
   clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
 }
 
@@ -742,7 +742,7 @@ body {
 .system-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
-  border-color: var(--color-whiskey-accent);
+  border-color: var(--color-nexus-accent);
 }
 
 .card-header {
@@ -783,7 +783,7 @@ body {
   font-family: var(--font-family-heading);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-whiskey-text);
+  color: var(--color-nexus-text);
   display: block;
 }
 
@@ -793,8 +793,8 @@ body {
   display: block;
 }
 
-/* Whiskey-themed icons */
-.whiskey-barrel-icon {
+/* Nexus-themed icons */
+.nexus-barrel-icon {
   position: relative;
   width: 60px;
   height: 60px;
@@ -807,7 +807,7 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
-  border: 2px solid var(--color-whiskey-accent);
+  border: 2px solid var(--color-nexus-accent);
   border-radius: var(--radius-barrel);
   opacity: 0.3;
 }
@@ -818,7 +818,7 @@ body {
   position: absolute;
   width: 100%;
   height: 6px;
-  background: var(--color-whiskey-accent);
+  background: var(--color-nexus-accent);
   border-radius: var(--radius-full);
   top: 50%;
   transform: translateY(-50%);
@@ -838,21 +838,21 @@ body {
   position: relative;
   width: 80%;
   height: 80%;
-  background: linear-gradient(to bottom, var(--color-whiskey-300), var(--color-whiskey-500));
+  background: linear-gradient(to bottom, var(--color-nexus-300), var(--color-nexus-500));
   border-radius: var(--radius-barrel);
   opacity: 0.7;
 }
 
 .quantum-pulse {
-  animation: whiskeyPour 2s infinite;
+  animation: nexusPour 2s infinite;
 }
 
-.whiskey-swirl-icon {
+.nexus-swirl-icon {
   position: relative;
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: radial-gradient(circle, var(--color-whiskey-300) 0%, var(--color-whiskey-500) 70%);
+  background: radial-gradient(circle, var(--color-nexus-300) 0%, var(--color-nexus-500) 70%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -864,7 +864,7 @@ body {
   height: 80%;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
-  animation: whiskeySwirl 10s linear infinite;
+  animation: nexusSwirl 10s linear infinite;
 }
 
 .swirl-bubbles {
@@ -873,18 +873,18 @@ body {
   height: 100%;
 }
 
-.whiskey-distillation-icon {
+.nexus-distillation-icon {
   position: relative;
   width: 40px;
   height: 60px;
-  background: linear-gradient(to right, transparent 45%, var(--color-whiskey-accent) 45%, var(--color-whiskey-accent) 55%, transparent 55%);
+  background: linear-gradient(to right, transparent 45%, var(--color-nexus-accent) 45%, var(--color-nexus-accent) 55%, transparent 55%);
 }
 
 .distillation-column {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, var(--color-whiskey-300) 0%, var(--color-whiskey-500) 100%);
+  background: linear-gradient(to bottom, var(--color-nexus-300) 0%, var(--color-nexus-500) 100%);
   clip-path: polygon(45% 0%, 55% 0%, 55% 100%, 45% 100%);
 }
 
@@ -897,10 +897,10 @@ body {
   height: 6px;
   background: rgba(255, 255, 255, 0.7);
   border-radius: 50%;
-  animation: whiskeyBubble 2s infinite;
+  animation: nexusBubble 2s infinite;
 }
 
-.whiskey-aging-icon {
+.nexus-aging-icon {
   position: relative;
   width: 60px;
   height: 60px;
@@ -913,7 +913,7 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
-  border: 2px solid var(--color-whiskey-accent);
+  border: 2px solid var(--color-nexus-accent);
   border-radius: var(--radius-barrel);
   opacity: 0.3;
 }
@@ -923,7 +923,7 @@ body {
   position: absolute;
   width: 80%;
   height: 6px;
-  background: var(--color-whiskey-accent);
+  background: var(--color-nexus-accent);
   border-radius: var(--radius-full);
   top: 50%;
   left: 10%;
@@ -934,12 +934,12 @@ body {
   position: relative;
   width: 80%;
   height: 80%;
-  background: linear-gradient(45deg, var(--color-whiskey-300) 25%, transparent 25%, transparent 75%, var(--color-whiskey-300) 75%),
-              linear-gradient(45deg, var(--color-whiskey-300) 25%, transparent 25%, transparent 75%, var(--color-whiskey-300) 75%);
+  background: linear-gradient(45deg, var(--color-nexus-300) 25%, transparent 25%, transparent 75%, var(--color-nexus-300) 75%),
+              linear-gradient(45deg, var(--color-nexus-300) 25%, transparent 25%, transparent 75%, var(--color-nexus-300) 75%);
   background-size: 10px 10px;
   background-position: 0 0, 5px 5px;
   border-radius: var(--radius-barrel);
-  animation: whiskeyAging 10s linear infinite;
+  animation: nexusAging 10s linear infinite;
 }
 
 .card-footer {
@@ -983,7 +983,7 @@ body {
   font-family: var(--font-family-heading);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-whiskey-text);
+  color: var(--color-nexus-text);
   display: block;
   margin-bottom: var(--space-4);
 }
@@ -1063,8 +1063,8 @@ body {
 }
 
 .quantum-state.active {
-  background: var(--color-whiskey-accent);
-  box-shadow: 0 0 15px var(--color-whiskey-accent);
+  background: var(--color-nexus-accent);
+  box-shadow: 0 0 15px var(--color-nexus-accent);
   transform: scale(1.2);
 }
 
@@ -1102,8 +1102,8 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: var(--color-whiskey-accent);
-  box-shadow: 0 0 15px var(--color-whiskey-accent);
+  background: var(--color-nexus-accent);
+  box-shadow: 0 0 15px var(--color-nexus-accent);
   width: 30px;
   height: 30px;
 }
@@ -1148,8 +1148,8 @@ body {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: var(--color-whiskey-accent);
-  box-shadow: 0 0 20px var(--color-whiskey-accent);
+  background: var(--color-nexus-accent);
+  box-shadow: 0 0 20px var(--color-nexus-accent);
   position: relative;
   animation: pulse 2s infinite;
 }
@@ -1213,7 +1213,7 @@ body {
 .dna-strand {
   width: 100px;
   height: 4px;
-  background: var(--color-whiskey-accent);
+  background: var(--color-nexus-accent);
   border-radius: var(--radius-full);
   position: relative;
   transform: rotate(45deg);
@@ -1261,7 +1261,7 @@ body {
 .brain-hemisphere {
   width: 80px;
   height: 100px;
-  background: var(--color-whiskey-accent);
+  background: var(--color-nexus-accent);
   clip-path: ellipse(40% 50% at 50% 50%);
   position: relative;
   opacity: 0.7;
@@ -1316,8 +1316,8 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: var(--color-whiskey-accent);
-  box-shadow: 0 0 15px var(--color-whiskey-accent);
+  background: var(--color-nexus-accent);
+  box-shadow: 0 0 15px var(--color-nexus-accent);
   width: 30px;
   height: 30px;
 }
@@ -1376,8 +1376,8 @@ body {
 }
 
 .personality-card.active {
-  border-color: var(--color-whiskey-accent);
-  box-shadow: 0 0 20px rgba(var(--color-whiskey-500-rgb), 0.2);
+  border-color: var(--color-nexus-accent);
+  box-shadow: 0 0 20px rgba(var(--color-nexus-500-rgb), 0.2);
 }
 
 .personality-header {
@@ -1398,15 +1398,15 @@ body {
   border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  background: var(--color-bg-whiskey);
-  color: var(--color-whiskey-text);
+  background: var(--color-bg-nexus);
+  color: var(--color-nexus-text);
 }
 
 .personality-content {
   text-align: center;
 }
 
-.whiskey-glass {
+.nexus-glass {
   width: 60px;
   height: 80px;
   margin: 0 auto var(--space-16);
@@ -1426,27 +1426,27 @@ body {
   overflow: hidden;
 }
 
-.whiskey-liquid {
+.nexus-liquid {
   position: absolute;
   bottom: 0;
   width: 100%;
   height: 70%;
-  background: linear-gradient(to top, var(--color-whiskey-500), var(--color-amber-500));
+  background: linear-gradient(to top, var(--color-nexus-500), var(--color-amber-500));
 }
 
-.whiskey-liquid.amber {
+.nexus-liquid.amber {
   background: linear-gradient(to top, var(--color-amber-500), var(--color-gold-500));
 }
 
-.whiskey-liquid.gold {
+.nexus-liquid.gold {
   background: linear-gradient(to top, var(--color-gold-500), var(--color-amber-400));
 }
 
-.whiskey-liquid.honey {
+.nexus-liquid.honey {
   background: linear-gradient(to top, #d2691e, #deb887);
 }
 
-.whiskey-foam {
+.nexus-foam {
   position: absolute;
   top: 0;
   width: 100%;

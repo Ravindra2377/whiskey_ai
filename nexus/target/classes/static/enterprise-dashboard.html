@@ -1124,7 +1124,7 @@
                 addRealTimeUpdate(`Starting integration for ${clientName}`);
                 showNotification(`Starting integration for ${clientName}`, 'info');
                 
-                const response = await fetch('/api/whiskey/enterprise/integrate', {
+                const response = await fetch('/api/nexus/enterprise/integrate', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1219,7 +1219,7 @@
                 addRealTimeUpdate('Starting system discovery');
                 showNotification('Starting system discovery', 'info');
                 
-                const response = await fetch('/api/whiskey/enterprise/discover-systems', {
+                const response = await fetch('/api/nexus/enterprise/discover-systems', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1266,7 +1266,7 @@
                 showNotification('Starting connection configuration', 'info');
                 
                 // First, we need to get discovered systems
-                const discoveryResponse = await fetch('/api/whiskey/enterprise/discover-systems', {
+                const discoveryResponse = await fetch('/api/nexus/enterprise/discover-systems', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1280,7 +1280,7 @@
                 
                 const discoveryResult = await discoveryResponse.json();
                 
-                const response = await fetch('/api/whiskey/enterprise/configure-connections', {
+                const response = await fetch('/api/nexus/enterprise/configure-connections', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1330,7 +1330,7 @@
                 showNotification('Starting agent deployment', 'info');
                 
                 // First, we need to get discovered systems
-                const discoveryResponse = await fetch('/api/whiskey/enterprise/discover-systems', {
+                const discoveryResponse = await fetch('/api/nexus/enterprise/discover-systems', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1344,7 +1344,7 @@
                 
                 const discoveryResult = await discoveryResponse.json();
                 
-                const response = await fetch('/api/whiskey/enterprise/deploy-agents', {
+                const response = await fetch('/api/nexus/enterprise/deploy-agents', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1400,7 +1400,7 @@
                 addRealTimeUpdate(`Requesting ${supportType} support`);
                 showNotification(`Requesting ${supportType} support`, 'info');
                 
-                const response = await fetch('/api/whiskey/enterprise/technical-support', {
+                const response = await fetch('/api/nexus/enterprise/technical-support', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1449,7 +1449,7 @@
                 addRealTimeUpdate(`Monitoring system ${systemId}`);
                 showNotification(`Monitoring system ${systemId}`, 'info');
                 
-                const response = await fetch(`/api/whiskey/enterprise/systems/${systemId}`, {
+                const response = await fetch(`/api/nexus/enterprise/systems/${systemId}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1484,7 +1484,7 @@
                 addRealTimeUpdate('Retrieving all systems');
                 showNotification('Retrieving all systems', 'info');
                 
-                const response = await fetch('/api/whiskey/enterprise/systems', {
+                const response = await fetch('/api/nexus/enterprise/systems', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1522,7 +1522,7 @@
                 addRealTimeUpdate('Refreshing system metrics');
                 showNotification('Refreshing system metrics', 'info');
                 
-                const response = await fetch('/api/whiskey/enterprise/metrics', {
+                const response = await fetch('/api/nexus/enterprise/metrics', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1607,7 +1607,7 @@
                 addRealTimeUpdate('Submitting swarm task');
                 showNotification('Submitting swarm task', 'info');
                 
-                const response = await fetch('/api/whiskey/enhanced/swarm-task', {
+                const response = await fetch('/api/nexus/enhanced/swarm-task', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1657,7 +1657,7 @@
                 addRealTimeUpdate('Generating code from natural language');
                 showNotification('Generating code from natural language', 'info');
                 
-                const response = await fetch('/api/whiskey/enhanced/natural-language', {
+                const response = await fetch('/api/nexus/enhanced/natural-language', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1706,7 +1706,7 @@
                 addRealTimeUpdate(`Processing task with ${personality} personality`);
                 showNotification(`Processing task with ${personality} personality`, 'info');
                 
-                const response = await fetch('/api/whiskey/enhanced/personality-task', {
+                const response = await fetch('/api/nexus/enhanced/personality-task', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1756,7 +1756,7 @@
                 addRealTimeUpdate(`Activating ${personality} supermodel personality`);
                 showNotification(`Activating ${personality} supermodel personality`, 'info');
                 
-                const response = await fetch('/api/whiskey/enhanced/supermodel-task', {
+                const response = await fetch('/api/nexus/enhanced/supermodel-task', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1807,7 +1807,7 @@
                 addRealTimeUpdate(`Translating code from ${sourceLanguage} to ${targetLanguage}`);
                 showNotification(`Translating code from ${sourceLanguage} to ${targetLanguage}`, 'info');
                 
-                const response = await fetch('/api/whiskey/enhanced/translate-code', {
+                const response = await fetch('/api/nexus/enhanced/translate-code', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1857,7 +1857,7 @@
                 addRealTimeUpdate('Self-healing buggy code');
                 showNotification('Self-healing buggy code', 'info');
                 
-                const response = await fetch('/api/whiskey/enhanced/self-heal', {
+                const response = await fetch('/api/nexus/enhanced/self-heal', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1906,7 +1906,7 @@
                 addRealTimeUpdate('Submitting dream task');
                 showNotification('Submitting dream task', 'info');
                 
-                const response = await fetch('/api/whiskey/enhanced/dream-code', {
+                const response = await fetch('/api/nexus/enhanced/dream-code', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1956,7 +1956,7 @@
                 addRealTimeUpdate('Scanning code for vulnerabilities');
                 showNotification('Scanning code for vulnerabilities', 'info');
                 
-                const response = await fetch('/api/whiskey/enhanced/predict-vulnerabilities', {
+                const response = await fetch('/api/nexus/enhanced/predict-vulnerabilities', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2010,7 +2010,7 @@
                 addRealTimeUpdate('Evolving code through genetic algorithms');
                 showNotification('Evolving code through genetic algorithms', 'info');
                 
-                const response = await fetch('/api/whiskey/enhanced/evolve-code', {
+                const response = await fetch('/api/nexus/enhanced/evolve-code', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

@@ -1,6 +1,6 @@
-// WHISKEY-like JavaScript for Whiskey AI Interface
+// NEXUS-like JavaScript for Nexus AI Interface
 
-class WhiskeyAI {
+class NexusAI {
     constructor() {
         this.websocket = null;
         this.voiceRecognition = null;
@@ -13,7 +13,7 @@ class WhiskeyAI {
     }
 
     async init() {
-        console.log('🚀 Initializing WHISKEY AI Interface...');
+        console.log('🚀 Initializing NEXUS AI Interface...');
 
         // Initialize components
         await this.initializeWebSocket();
@@ -24,9 +24,9 @@ class WhiskeyAI {
         this.startTimeUpdates();
 
         // Welcome message
-        this.speakResponse("Good evening. WHISKEY AI systems are online and ready for deployment.");
+        this.speakResponse("Good evening. NEXUS AI systems are online and ready for deployment.");
 
-        console.log('✅ WHISKEY Interface fully operational');
+        console.log('✅ NEXUS Interface fully operational');
     }
 
     // WebSocket Communication
@@ -69,7 +69,7 @@ class WhiskeyAI {
                 this.displayMessage(data.message, data.user, false);
                 break;
             case 'ai_response':
-                this.displayMessage(data.message, 'WHISKEY AI', true);
+                this.displayMessage(data.message, 'NEXUS AI', true);
                 this.speakResponse(data.message);
                 break;
             case 'status_update':
@@ -287,7 +287,7 @@ class WhiskeyAI {
 
         } catch (error) {
             console.error('Error sending command:', error);
-            this.displayMessage('Sorry, there was an error processing your command.', 'WHISKEY AI', true);
+            this.displayMessage('Sorry, there was an error processing your command.', 'NEXUS AI', true);
         } finally {
             this.hideTypingIndicator();
         }
@@ -357,7 +357,7 @@ class WhiskeyAI {
             </div>
             <div class="message-content">
                 <div class="message-header">
-                    <span class="sender-name">WHISKEY AI</span>
+                    <span class="sender-name">NEXUS AI</span>
                     <span class="message-time">${this.getCurrentTime()}</span>
                 </div>
                 <div class="message-text">
@@ -380,7 +380,7 @@ class WhiskeyAI {
     // Voice Controls
     toggleVoiceInput() {
         if (!this.voiceRecognition) {
-            this.displayMessage('Voice recognition is not supported in your browser.', 'WHISKEY AI', true);
+            this.displayMessage('Voice recognition is not supported in your browser.', 'NEXUS AI', true);
             return;
         }
 
@@ -627,7 +627,7 @@ class WhiskeyAI {
     // Supermodel Personality Functions
     async setSupermodelPersonality(personality) {
         try {
-            const response = await fetch('/api/whiskey/enhanced/supermodel-task', {
+            const response = await fetch('/api/nexus/enhanced/supermodel-task', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -643,7 +643,7 @@ class WhiskeyAI {
             
             if (data.status === 'SUCCESS') {
                 // Display supermodel response
-                this.displayMessage(data.supermodelResponsePattern, 'WHISKEY AI SUPERMODEL', true);
+                this.displayMessage(data.supermodelResponsePattern, 'NEXUS AI SUPERMODEL', true);
                 this.speakResponse(data.supermodelResponsePattern);
                 
                 // Add to activity log
@@ -657,7 +657,7 @@ class WhiskeyAI {
             }
         } catch (error) {
             console.error('Error setting supermodel personality:', error);
-            this.displayMessage('Sorry, there was an error activating the supermodel personality.', 'WHISKEY AI', true);
+            this.displayMessage('Sorry, there was an error activating the supermodel personality.', 'NEXUS AI', true);
         }
     }
 
@@ -736,10 +736,10 @@ function setSupermodelPersonality(personality) {
     jarvis.setSupermodelPersonality(personality);
 }
 
-// Initialize WHISKEY when page loads
+// Initialize NEXUS when page loads
 
 document.addEventListener('DOMContentLoaded', () => {
-    jarvis = new WhiskeyAI();
+    jarvis = new NexusAI();
 
     // Add some demo activities
     setTimeout(() => {

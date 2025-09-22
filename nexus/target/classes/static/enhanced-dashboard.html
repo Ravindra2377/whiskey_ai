@@ -759,7 +759,7 @@
                 addRealTimeUpdate('Submitting swarm task');
                 showNotification('Submitting swarm task', 'info');
                 
-                const response = await fetch('/api/whiskey/enhanced/swarm-task', {
+                const response = await fetch('/api/nexus/enhanced/swarm-task', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -813,7 +813,7 @@
                 addRealTimeUpdate('Generating code from natural language');
                 showNotification('Generating code from natural language', 'info');
                 
-                const response = await fetch('/api/whiskey/enhanced/natural-language', {
+                const response = await fetch('/api/nexus/enhanced/natural-language', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -866,7 +866,7 @@
                 addRealTimeUpdate(`Processing task with ${personality} personality`);
                 showNotification(`Processing task with ${personality} personality`, 'info');
                 
-                const response = await fetch('/api/whiskey/enhanced/personality-task', {
+                const response = await fetch('/api/nexus/enhanced/personality-task', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -916,7 +916,7 @@
                 addRealTimeUpdate(`Activating ${personality} supermodel personality`);
                 showNotification(`Activating ${personality} supermodel personality`, 'info');
                 
-                const response = await fetch('/api/whiskey/enhanced/supermodel-task', {
+                const response = await fetch('/api/nexus/enhanced/supermodel-task', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

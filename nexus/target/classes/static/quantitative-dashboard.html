@@ -332,7 +332,7 @@
                 parameters: {}
             };
             
-            fetch('/api/whiskey/quant/trading/algorithmic-execution', {
+            fetch('/api/nexus/quant/trading/algorithmic-execution', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -376,7 +376,7 @@
                     parameters: {}
                 };
                 
-                fetch('/api/whiskey/quant/risk/portfolio-analysis', {
+                fetch('/api/nexus/quant/risk/portfolio-analysis', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -420,7 +420,7 @@
                 "spread": 0.1
             };
             
-            fetch('/api/whiskey/quant/trading/hft-execution', {
+            fetch('/api/nexus/quant/trading/hft-execution', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -456,7 +456,7 @@
             try {
                 const historicalData = JSON.parse(document.getElementById('historicalData').value);
                 
-                fetch('/api/whiskey/quant/alpha/discovery', {
+                fetch('/api/nexus/quant/alpha/discovery', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

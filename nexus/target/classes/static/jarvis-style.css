@@ -1,4 +1,4 @@
-/* WHISKEY-like CSS for Whiskey AI Interface */
+/* NEXUS-like CSS for Nexus AI Interface */
 
 :root {
     --primary-blue: #00d4ff;
@@ -23,7 +23,7 @@
     box-sizing: border-box;
 }
 
-.whiskey-body {
+.nexus-body {
     background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
     color: var(--text-primary);
     font-family: 'Rajdhani', sans-serif;
@@ -62,7 +62,7 @@
 }
 
 /* Main Container */
-.whiskey-container {
+.nexus-container {
     width: 100%;
     height: 100vh;
     display: flex;
@@ -72,7 +72,7 @@
 }
 
 /* Header HUD */
-.whiskey-header {
+.nexus-header {
     height: 80px;
     display: flex;
     align-items: center;
@@ -90,7 +90,7 @@
     gap: 30px;
 }
 
-.whiskey-logo {
+.nexus-logo {
     display: flex;
     align-items: center;
     gap: 15px;
@@ -222,7 +222,7 @@
 }
 
 /* Main Grid */
-.whiskey-main {
+.nexus-main {
     flex: 1;
     display: grid;
     grid-template-columns: 350px 1fr 350px;

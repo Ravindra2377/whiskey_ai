@@ -1,5 +1,5 @@
-// WHISKEY AI Dashboard JavaScript
-class WhiskeyAI {
+// NEXUS AI Dashboard JavaScript
+class NexusAI {
     constructor() {
         this.data = {
             aiSystems: {
@@ -149,14 +149,14 @@ class WhiskeyAI {
         loader.classList.remove('hidden');
         loginBtn.disabled = true;
 
-        // Simulate login process with whiskey distillation animation
+        // Simulate login process with nexus distillation animation
         setTimeout(() => {
             document.getElementById('loginContainer').classList.add('hidden');
             document.getElementById('dashboardContainer').classList.remove('hidden');
             this.initializeDashboard();
             
             // Show welcome message
-            this.showNotification('Welcome to WHISKEY AI Distillery', 'Your premium AI experience is ready');
+            this.showNotification('Welcome to NEXUS AI Distillery', 'Your premium AI experience is ready');
         }, 2000);
     }
 
@@ -168,7 +168,7 @@ class WhiskeyAI {
             
             // Reset form
             document.getElementById('username').value = 'admin';
-            document.getElementById('password').value = 'whiskey-ai';
+            document.getElementById('password').value = 'nexus-ai';
         }
     }
 
@@ -256,10 +256,10 @@ class WhiskeyAI {
             <div class="feedback-content">
                 <h4>Personality Mode Activated</h4>
                 <p>${personality.charAt(0).toUpperCase() + personality.slice(1)} mode is now active</p>
-                <div class="whiskey-glass-notification">
+                <div class="nexus-glass-notification">
                     <div class="glass-body">
-                        <div class="whiskey-liquid"></div>
-                        <div class="whiskey-foam"></div>
+                        <div class="nexus-liquid"></div>
+                        <div class="nexus-foam"></div>
                     </div>
                     <div class="glass-base"></div>
                 </div>
@@ -290,7 +290,7 @@ class WhiskeyAI {
     showNotification(title, message) {
         // Create notification element
         const notification = document.createElement('div');
-        notification.className = 'whiskey-notification';
+        notification.className = 'nexus-notification';
         notification.innerHTML = `
             <div class="notification-content">
                 <h4>${title}</h4>
@@ -533,35 +533,35 @@ class WhiskeyAI {
     }
 
     startAnimations() {
-        // Animate whiskey-themed elements
-        this.animateWhiskeyElements();
+        // Animate nexus-themed elements
+        this.animateNexusElements();
     }
 
-    animateWhiskeyElements() {
+    animateNexusElements() {
         // Animate barrel icons
         const barrels = document.querySelectorAll('.barrel-contents');
         barrels.forEach((barrel, index) => {
             setTimeout(() => {
-                barrel.style.animation = 'whiskeyPour 2s ease-in-out';
+                barrel.style.animation = 'nexusPour 2s ease-in-out';
             }, index * 300);
         });
         
         // Animate swirl icons
         const swirls = document.querySelectorAll('.swirl-liquid');
         swirls.forEach(swirl => {
-            swirl.style.animation = 'whiskeySwirl 10s linear infinite';
+            swirl.style.animation = 'nexusSwirl 10s linear infinite';
         });
         
         // Animate distillation icons
         const bubbles = document.querySelectorAll('.distillation-bubbles');
         bubbles.forEach(bubble => {
-            bubble.style.animation = 'whiskeyBubble 2s infinite';
+            bubble.style.animation = 'nexusBubble 2s infinite';
         });
         
         // Animate aging icons
         const agingLiquids = document.querySelectorAll('.aging-liquid');
         agingLiquids.forEach(liquid => {
-            liquid.style.animation = 'whiskeyAging 10s linear infinite';
+            liquid.style.animation = 'nexusAging 10s linear infinite';
         });
     }
 
@@ -672,7 +672,7 @@ class WhiskeyAI {
 
 // Initialize the application when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.whiskeyAI = new WhiskeyAI();
+    window.nexusAI = new NexusAI();
 });
 
 // Add CSS for quantum particles

@@ -1,8 +1,8 @@
-// Enterprise Dashboard JavaScript for WHISKEY AI Universal Enterprise Integration Engine
+// Enterprise Dashboard JavaScript for NEXUS AI Universal Enterprise Integration Engine
 
 class EnterpriseDashboard {
     constructor() {
-        this.apiBaseUrl = '/api/whiskey/enterprise';
+        this.apiBaseUrl = '/api/nexus/enterprise';
         this.init();
     }
 

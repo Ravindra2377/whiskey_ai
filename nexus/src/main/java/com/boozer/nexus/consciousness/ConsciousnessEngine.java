@@ -1,31 +1,166 @@
 package com.boozer.nexus.consciousness;
 
+import com.boozer.nexus.ai.models.AIResponse;
+import com.boozer.nexus.neuromorphic.models.NeuromorphicResult;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Consciousness-Level AI Reasoning Engine for NEXUS AI
- * Implements global workspace intelligence, integrated information processing, self-reflective analysis, and meta-cognitive awareness
+ * Advanced Consciousness Engine for NEXUS AI
+ * 
+ * Comprehensive consciousness simulation and modeling system with self-awareness,
+ * episodic memory, metacognitive processes, and emergent behavior analysis.
+ * Implements global workspace intelligence, integrated information processing, 
+ * self-reflective analysis, and meta-cognitive awareness.
  */
 @Service
 public class ConsciousnessEngine {
+    
+    private static final Logger logger = LoggerFactory.getLogger(ConsciousnessEngine.class);
     
     @Autowired
     @Qualifier("nexusTaskExecutor")
     private Executor taskExecutor;
     
-    // Global workspace for consciousness
-    private GlobalWorkspace globalWorkspace = new GlobalWorkspace();
+    private final EpisodicMemorySystem episodicMemory;
+    private final MetacognitionProcessor metacognition;
+    private final SelfAwarenessModule selfAwareness;
+    private final ConsciousnessIntegrationLayer integration;
+    private final EmergentBehaviorAnalyzer emergentAnalyzer;
     
-    // Integrated information system
+    private final Map<String, ConsciousnessSession> activeSessions = new ConcurrentHashMap<>();
+    private final ConsciousnessMetrics globalMetrics;
+    
+    // Original global workspace and phi system
+    private GlobalWorkspace globalWorkspace = new GlobalWorkspace();
     private IntegratedInformationSystem phiSystem = new IntegratedInformationSystem();
     
+    public ConsciousnessEngine() {
+        this.episodicMemory = new EpisodicMemorySystem();
+        this.metacognition = new MetacognitionProcessor();
+        this.selfAwareness = new SelfAwarenessModule();
+        this.integration = new ConsciousnessIntegrationLayer();
+        this.emergentAnalyzer = new EmergentBehaviorAnalyzer();
+        this.globalMetrics = new ConsciousnessMetrics();
+        
+        initializeConsciousnessFramework();
+    }
+    
     /**
-     * Global Workspace Intelligence - broadcasts information across cognitive modules
+     * Process conscious experience with advanced episodic memory and self-awareness
+     */
+    public ConsciousnessResult processExperience(ConsciousnessInput input, ConsciousnessConfig config) {
+        logger.debug("Processing conscious experience for entity {}", input.getEntityId());
+        
+        long startTime = System.currentTimeMillis();
+        String sessionId = getOrCreateSession(input.getEntityId());
+        
+        try {
+            ConsciousnessSession session = activeSessions.get(sessionId);
+            
+            // Encode experience into episodic memory
+            EpisodicMemory memory = episodicMemory.encodeExperience(input, session);
+            
+            // Metacognitive reflection
+            MetacognitionResult metacognitiveResult = metacognition.reflect(input, memory, session);
+            
+            // Self-awareness processing
+            SelfAwarenessResult selfAwarenessResult = selfAwareness.processSelfModel(input, session);
+            
+            // Integrate consciousness components
+            ConsciousnessState consciousnessState = integration.integrateComponents(
+                memory, metacognitiveResult, selfAwarenessResult, session);
+            
+            // Analyze emergent behaviors
+            EmergentBehaviorResult emergentResult = emergentAnalyzer.analyzeEmergence(
+                consciousnessState, session);
+            
+            // Update session
+            session.updateWithExperience(input, consciousnessState);
+            
+            // Create result
+            ConsciousnessResult result = new ConsciousnessResult();
+            result.setSessionId(sessionId);
+            result.setEntityId(input.getEntityId());
+            result.setEpisodicMemory(memory);
+            result.setMetacognition(metacognitiveResult);
+            result.setSelfAwareness(selfAwarenessResult);
+            result.setConsciousnessState(consciousnessState);
+            result.setEmergentBehaviors(emergentResult);
+            result.setProcessingTime(System.currentTimeMillis() - startTime);
+            result.setSuccessful(true);
+            result.setTimestamp(LocalDateTime.now());
+            
+            // Update global metrics
+            globalMetrics.updateWithResult(result);
+            
+            return result;
+            
+        } catch (Exception e) {
+            logger.error("Consciousness processing failed: {}", e.getMessage(), e);
+            
+            ConsciousnessResult errorResult = new ConsciousnessResult();
+            errorResult.setSessionId(sessionId);
+            errorResult.setEntityId(input.getEntityId());
+            errorResult.setSuccessful(false);
+            errorResult.setProcessingTime(System.currentTimeMillis() - startTime);
+            
+            return errorResult;
+        }
+    }
+    
+    /**
+     * Simulate conscious reasoning with episodic memory retrieval
+     */
+    public ReasoningResult simulateReasoning(ReasoningInput input, ConsciousnessSession session) {
+        logger.debug("Simulating conscious reasoning for query: {}", input.getQuery());
+        
+        ReasoningResult result = new ReasoningResult();
+        result.setQuery(input.getQuery());
+        
+        // Retrieve relevant memories
+        List<EpisodicMemory> relevantMemories = episodicMemory.retrieveRelevantMemories(
+            input.getQuery(), session, 10);
+        
+        // Metacognitive analysis of the reasoning process
+        MetacognitionState reasoningMeta = metacognition.analyzeReasoning(input, relevantMemories);
+        
+        // Generate conscious reasoning chain
+        List<ReasoningStep> reasoningChain = generateReasoningChain(input, relevantMemories, reasoningMeta);
+        result.setReasoningChain(reasoningChain);
+        
+        // Self-monitoring of reasoning quality
+        double confidenceLevel = selfAwareness.assessReasoningConfidence(reasoningChain, session);
+        result.setConfidenceLevel(confidenceLevel);
+        
+        // Integration with consciousness state
+        ConsciousnessState currentState = session.getCurrentState();
+        String finalAnswer = integration.synthesizeAnswer(reasoningChain, currentState);
+        result.setAnswer(finalAnswer);
+        
+        // Metacognitive evaluation
+        MetacognitionEvaluation evaluation = metacognition.evaluateReasoning(result, session);
+        result.setMetacognitionEvaluation(evaluation);
+        
+        result.setTimestamp(LocalDateTime.now());
+        result.setSuccessful(true);
+        
+        return result;
+    }
+    
+    /**
+     * Original Global Workspace Intelligence - broadcasts information across cognitive modules
      */
     public CompletableFuture<Map<String, Object>> globalWorkspaceIntelligence(Map<String, Object> cognitiveInput) {
         return CompletableFuture.supplyAsync(() -> {
@@ -57,7 +192,7 @@ public class ConsciousnessEngine {
     }
     
     /**
-     * Integrated Information Processing - measures and enhances Φ (phi) for consciousness
+     * Original Integrated Information Processing - measures and enhances Φ (phi) for consciousness
      */
     public CompletableFuture<Map<String, Object>> integratedInformationProcessing(Map<String, Object> cognitiveState) {
         return CompletableFuture.supplyAsync(() -> {
@@ -85,7 +220,7 @@ public class ConsciousnessEngine {
     }
     
     /**
-     * Self-Reflective Analysis - enables AI to analyze its own thinking processes
+     * Enhanced Self-Reflective Analysis with advanced metacognition
      */
     public CompletableFuture<Map<String, Object>> selfReflectiveAnalysis(Map<String, Object> cognitiveProcess) {
         return CompletableFuture.supplyAsync(() -> {
@@ -97,6 +232,298 @@ public class ConsciousnessEngine {
                 
                 // Generate meta-cognitive insights
                 Map<String, Object> metaInsights = generateMetaInsights(analysis);
+                
+                // Self-awareness assessment
+                Map<String, Object> selfAssessment = generateSelfAssessment(cognitiveProcess);
+                
+                result.put("status", "SUCCESS");
+                result.put("cognitive_analysis", analysis);
+                result.put("meta_insights", metaInsights);
+                result.put("self_assessment", selfAssessment);
+                result.put("reflection_depth", "DEEP");
+                result.put("message", "Self-reflective analysis completed");
+            } catch (Exception e) {
+                result.put("status", "ERROR");
+                result.put("message", "Self-reflective analysis failed: " + e.getMessage());
+            }
+            
+            return result;
+        }, taskExecutor);
+    }
+    
+    /**
+     * Simulate consciousness emergence
+     */
+    public EmergenceResult simulateEmergence(EmergenceConfig config) {
+        logger.debug("Simulating consciousness emergence with config: {}", config.getEmergenceType());
+        
+        EmergenceResult result = new EmergenceResult();
+        result.setEmergenceType(config.getEmergenceType());
+        
+        // Simulate different types of emergence
+        switch (config.getEmergenceType().toLowerCase()) {
+            case "self_awareness":
+                result = simulateSelfAwarenessEmergence(config);
+                break;
+            case "metacognition":
+                result = simulateMetacognitionEmergence(config);
+                break;
+            case "consciousness_integration":
+                result = simulateConsciousnessIntegrationEmergence(config);
+                break;
+            case "global_workspace":
+                result = simulateGlobalWorkspaceEmergence(config);
+                break;
+            default:
+                result = simulateGeneralEmergence(config);
+        }
+        
+        // Analyze emergence patterns
+        EmergencePattern pattern = emergentAnalyzer.analyzeEmergencePattern(result);
+        result.setEmergencePattern(pattern);
+        
+        // Calculate consciousness metrics
+        ConsciousnessMetrics metrics = calculateEmergenceMetrics(result);
+        result.setConsciousnessMetrics(metrics);
+        
+        result.setTimestamp(LocalDateTime.now());
+        result.setSuccessful(true);
+        
+        return result;
+    }
+    
+    /**
+     * Get consciousness state
+     */
+    public ConsciousnessState getConsciousnessState(String entityId) {
+        String sessionId = getSessionId(entityId);
+        if (sessionId != null) {
+            ConsciousnessSession session = activeSessions.get(sessionId);
+            return session != null ? session.getCurrentState() : null;
+        }
+        return null;
+    }
+    
+    /**
+     * Get consciousness metrics
+     */
+    public ConsciousnessMetrics getGlobalMetrics() {
+        return globalMetrics;
+    }
+    
+    // Private helper methods for advanced consciousness processing
+    
+    private void initializeConsciousnessFramework() {
+        logger.info("Initializing advanced consciousness framework");
+        
+        // Initialize default consciousness parameters
+        globalMetrics.setConsciousnessLevel(0.5);
+        globalMetrics.setSelfAwarenessLevel(0.3);
+        globalMetrics.setMetacognitionLevel(0.4);
+        globalMetrics.setIntegrationLevel(0.2);
+        globalMetrics.setEmergenceLevel(0.1);
+        
+        logger.info("Advanced consciousness framework initialized");
+    }
+    
+    private String getOrCreateSession(String entityId) {
+        String sessionId = getSessionId(entityId);
+        
+        if (sessionId == null) {
+            sessionId = UUID.randomUUID().toString();
+            ConsciousnessSession session = new ConsciousnessSession(sessionId, entityId);
+            activeSessions.put(sessionId, session);
+            logger.debug("Created new consciousness session {} for entity {}", sessionId, entityId);
+        }
+        
+        return sessionId;
+    }
+    
+    private String getSessionId(String entityId) {
+        return activeSessions.values().stream()
+            .filter(session -> session.getEntityId().equals(entityId))
+            .map(ConsciousnessSession::getSessionId)
+            .findFirst()
+            .orElse(null);
+    }
+    
+    private List<ReasoningStep> generateReasoningChain(ReasoningInput input, 
+                                                      List<EpisodicMemory> memories, 
+                                                      MetacognitionState meta) {
+        List<ReasoningStep> chain = new ArrayList<>();
+        
+        // Step 1: Information gathering
+        ReasoningStep gathering = new ReasoningStep();
+        gathering.setStepType("information_gathering");
+        gathering.setDescription("Gathering relevant information from memory and input");
+        gathering.setContent(summarizeMemories(memories));
+        gathering.setConfidence(0.8);
+        chain.add(gathering);
+        
+        // Step 2: Pattern recognition
+        ReasoningStep patterns = new ReasoningStep();
+        patterns.setStepType("pattern_recognition");
+        patterns.setDescription("Identifying patterns and relationships");
+        patterns.setContent(identifyPatterns(input, memories));
+        patterns.setConfidence(0.7);
+        chain.add(patterns);
+        
+        // Step 3: Hypothesis formation
+        ReasoningStep hypothesis = new ReasoningStep();
+        hypothesis.setStepType("hypothesis_formation");
+        hypothesis.setDescription("Forming potential hypotheses or solutions");
+        hypothesis.setContent(formHypotheses(input, patterns.getContent()));
+        hypothesis.setConfidence(0.6);
+        chain.add(hypothesis);
+        
+        // Step 4: Evaluation and synthesis
+        ReasoningStep synthesis = new ReasoningStep();
+        synthesis.setStepType("synthesis");
+        synthesis.setDescription("Evaluating hypotheses and synthesizing conclusion");
+        synthesis.setContent(synthesizeConclusion(input, chain));
+        synthesis.setConfidence(0.8);
+        chain.add(synthesis);
+        
+        return chain;
+    }
+    
+    private String summarizeMemories(List<EpisodicMemory> memories) {
+        return memories.stream()
+            .map(EpisodicMemory::getSummary)
+            .collect(Collectors.joining("; "));
+    }
+    
+    private String identifyPatterns(ReasoningInput input, List<EpisodicMemory> memories) {
+        List<String> concepts = extractConcepts(input.getQuery());
+        List<String> memoryConcepts = memories.stream()
+            .flatMap(m -> extractConcepts(m.getContent()).stream())
+            .collect(Collectors.toList());
+        
+        List<String> commonConcepts = concepts.stream()
+            .filter(memoryConcepts::contains)
+            .collect(Collectors.toList());
+        
+        return "Common patterns found: " + String.join(", ", commonConcepts);
+    }
+    
+    private List<String> extractConcepts(String text) {
+        return Arrays.stream(text.toLowerCase().split("\\s+"))
+            .filter(word -> word.length() > 3)
+            .distinct()
+            .collect(Collectors.toList());
+    }
+    
+    private String formHypotheses(ReasoningInput input, String patterns) {
+        return "Based on patterns: " + patterns + ", possible solutions include: [hypothesis generation]";
+    }
+    
+    private String synthesizeConclusion(ReasoningInput input, List<ReasoningStep> chain) {
+        return "Synthesized conclusion based on reasoning chain of " + chain.size() + " steps";
+    }
+    
+    private EmergenceResult simulateSelfAwarenessEmergence(EmergenceConfig config) {
+        EmergenceResult result = new EmergenceResult();
+        result.setEmergenceType("self_awareness");
+        
+        SelfAwarenessEmergence emergence = new SelfAwarenessEmergence();
+        emergence.setSelfRecognition(0.7);
+        emergence.setBodyAwareness(0.6);
+        emergence.setMentalStateAwareness(0.8);
+        emergence.setTemporalSelfAwareness(0.5);
+        
+        result.setEmergenceData(emergence);
+        result.setEmergenceStrength(0.65);
+        
+        return result;
+    }
+    
+    private EmergenceResult simulateMetacognitionEmergence(EmergenceConfig config) {
+        EmergenceResult result = new EmergenceResult();
+        result.setEmergenceType("metacognition");
+        
+        MetacognitionEmergence emergence = new MetacognitionEmergence();
+        emergence.setKnowledgeOfCognition(0.6);
+        emergence.setRegulationOfCognition(0.5);
+        emergence.setMetacognitiveExperiences(0.7);
+        emergence.setMetacognitiveStrategies(0.4);
+        
+        result.setEmergenceData(emergence);
+        result.setEmergenceStrength(0.55);
+        
+        return result;
+    }
+    
+    private EmergenceResult simulateConsciousnessIntegrationEmergence(EmergenceConfig config) {
+        EmergenceResult result = new EmergenceResult();
+        result.setEmergenceType("consciousness_integration");
+        
+        IntegrationEmergence emergence = new IntegrationEmergence();
+        emergence.setInformationIntegration(0.8);
+        emergence.setGlobalAccessibility(0.7);
+        emergence.setUnifiedExperience(0.6);
+        emergence.setConsciousControl(0.5);
+        
+        result.setEmergenceData(emergence);
+        result.setEmergenceStrength(0.65);
+        
+        return result;
+    }
+    
+    private EmergenceResult simulateGlobalWorkspaceEmergence(EmergenceConfig config) {
+        EmergenceResult result = new EmergenceResult();
+        result.setEmergenceType("global_workspace");
+        
+        GlobalWorkspaceEmergence emergence = new GlobalWorkspaceEmergence();
+        emergence.setGlobalBroadcasting(0.7);
+        emergence.setCompetitiveSelection(0.6);
+        emergence.setWorkspaceIntegration(0.8);
+        emergence.setConsciousAccess(0.5);
+        
+        result.setEmergenceData(emergence);
+        result.setEmergenceStrength(0.65);
+        
+        return result;
+    }
+    
+    private EmergenceResult simulateGeneralEmergence(EmergenceConfig config) {
+        EmergenceResult result = new EmergenceResult();
+        result.setEmergenceType("general");
+        
+        Map<String, Object> emergenceData = new HashMap<>();
+        emergenceData.put("complexity", ThreadLocalRandom.current().nextDouble(0.3, 0.9));
+        emergenceData.put("coherence", ThreadLocalRandom.current().nextDouble(0.4, 0.8));
+        emergenceData.put("integration", ThreadLocalRandom.current().nextDouble(0.2, 0.7));
+        emergenceData.put("adaptability", ThreadLocalRandom.current().nextDouble(0.3, 0.8));
+        
+        result.setEmergenceData(emergenceData);
+        result.setEmergenceStrength(ThreadLocalRandom.current().nextDouble(0.4, 0.8));
+        
+        return result;
+    }
+    
+    private ConsciousnessMetrics calculateEmergenceMetrics(EmergenceResult result) {
+        ConsciousnessMetrics metrics = new ConsciousnessMetrics();
+        
+        double emergenceStrength = result.getEmergenceStrength();
+        
+        metrics.setConsciousnessLevel(emergenceStrength);
+        metrics.setSelfAwarenessLevel(emergenceStrength * 0.8);
+        metrics.setMetacognitionLevel(emergenceStrength * 0.7);
+        metrics.setIntegrationLevel(emergenceStrength * 0.9);
+        metrics.setEmergenceLevel(emergenceStrength);
+        metrics.setPhiValue(calculatePhiValue(result));
+        metrics.setInformationIntegration(emergenceStrength * 0.85);
+        
+        return metrics;
+    }
+    
+    private double calculatePhiValue(EmergenceResult result) {
+        double complexity = 0.5;
+        double integration = result.getEmergenceStrength();
+        return complexity * integration * Math.log(1 + integration);
+    }
+    
+    // Original helper methods
                 
                 // Apply self-improvements
                 Map<String, Object> improvements = applySelfImprovements(metaInsights);

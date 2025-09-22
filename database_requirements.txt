@@ -1,0 +1,10 @@
+# Database connection dependencies for Whiskey AI Platform
+psycopg2-binary==2.9.7
+redis==4.6.0
+influxdb-client==1.38.0
+python-dotenv==1.0.0
+
+# Additional dependencies for enhanced functionality
+sqlalchemy==2.0.20
+pandas==2.0.3
+numpy==1.25.2
