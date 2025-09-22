@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="NEXUS AI - Revolutionary Quantum Consciousness Platform. The world's most advanced AI system with quantum consciousness simulation, neuromorphic processing, and multi-provider integration."
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Quantum-inspired gradient backgrounds -->
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      code {
+        font-family: 'JetBrains Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+          monospace;
+      }
+
+      /* Quantum particle effects */
+      .quantum-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+        background: 
+          radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+        animation: quantumFlow 20s ease-in-out infinite;
+      }
+
+      @keyframes quantumFlow {
+        0%, 100% { 
+          background-position: 0% 0%, 100% 100%, 50% 50%;
+          filter: hue-rotate(0deg);
+        }
+        33% { 
+          background-position: 30% 70%, 70% 30%, 80% 20%;
+          filter: hue-rotate(120deg);
+        }
+        66% { 
+          background-position: 70% 30%, 30% 70%, 20% 80%;
+          filter: hue-rotate(240deg);
+        }
+      }
+
+      /* Consciousness wave effects */
+      .consciousness-waves {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+        opacity: 0.1;
+        background: 
+          linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+        animation: consciousnessWave 15s linear infinite;
+      }
+
+      @keyframes consciousnessWave {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100vw); }
+      }
+
+      /* Neuromorphic pulse effects */
+      .neuromorphic-pulse {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 2px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: -1;
+        box-shadow: 
+          0 0 10px rgba(255, 255, 255, 0.5),
+          0 0 20px rgba(120, 219, 255, 0.3),
+          0 0 30px rgba(120, 119, 198, 0.2);
+        animation: neuromorphicPulse 3s ease-in-out infinite;
+      }
+
+      @keyframes neuromorphicPulse {
+        0%, 100% { 
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 0.8;
+        }
+        50% { 
+          transform: translate(-50%, -50%) scale(20);
+          opacity: 0;
+        }
+      }
+    </style>
+    
+    <title>NEXUS AI - Quantum Consciousness Platform</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run NEXUS AI.</noscript>
+    
+    <!-- Quantum background effects -->
+    <div class="quantum-bg"></div>
+    <div class="consciousness-waves"></div>
+    <div class="neuromorphic-pulse"></div>
+    
+    <div id="root"></div>
+  </body>
+</html>

@@ -1,0 +1,380 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS Variables for Quantum Theme */
+:root {
+  --quantum-primary: #7877c6;
+  --quantum-secondary: #ff77c6;
+  --quantum-accent: #78dbff;
+  --quantum-bg-primary: #0f0f23;
+  --quantum-bg-secondary: #1a1a2e;
+  --quantum-bg-tertiary: #16213e;
+  --quantum-text-primary: #ffffff;
+  --quantum-text-secondary: #b0b0d0;
+  --quantum-text-muted: #808080;
+  --quantum-border: #333366;
+  --quantum-glow: rgba(120, 119, 198, 0.3);
+  --consciousness-flow: linear-gradient(135deg, var(--quantum-primary), var(--quantum-secondary), var(--quantum-accent));
+  --neuromorphic-pulse: radial-gradient(circle, var(--quantum-accent), transparent);
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--quantum-bg-primary);
+  color: var(--quantum-text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--quantum-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--quantum-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--quantum-secondary);
+}
+
+/* Custom Utility Classes */
+.quantum-gradient {
+  background: var(--consciousness-flow);
+}
+
+.quantum-glow {
+  box-shadow: 0 0 20px var(--quantum-glow);
+}
+
+.neuromorphic-shadow {
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(120, 119, 198, 0.1);
+}
+
+.consciousness-border {
+  border: 1px solid var(--quantum-border);
+  background: rgba(26, 26, 46, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.quantum-button {
+  @apply px-6 py-3 rounded-lg font-medium transition-all duration-300;
+  background: var(--consciousness-flow);
+  color: white;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.quantum-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(120, 119, 198, 0.4);
+}
+
+.quantum-button:active {
+  transform: translateY(0);
+}
+
+.quantum-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.quantum-button:hover::before {
+  left: 100%;
+}
+
+.quantum-card {
+  @apply rounded-xl p-6;
+  background: rgba(26, 26, 46, 0.8);
+  border: 1px solid var(--quantum-border);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.quantum-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(120, 119, 198, 0.2);
+  border-color: var(--quantum-primary);
+}
+
+.consciousness-grid {
+  background-image: 
+    linear-gradient(rgba(120, 119, 198, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 119, 198, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.neuromorphic-input {
+  @apply w-full px-4 py-3 rounded-lg border transition-all duration-300;
+  background: rgba(26, 26, 46, 0.6);
+  border-color: var(--quantum-border);
+  color: var(--quantum-text-primary);
+  backdrop-filter: blur(5px);
+}
+
+.neuromorphic-input:focus {
+  outline: none;
+  border-color: var(--quantum-primary);
+  box-shadow: 0 0 0 3px rgba(120, 119, 198, 0.1);
+}
+
+.neuromorphic-input::placeholder {
+  color: var(--quantum-text-muted);
+}
+
+/* Animation Classes */
+.quantum-pulse {
+  animation: quantumPulse 2s ease-in-out infinite;
+}
+
+@keyframes quantumPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+.consciousness-float {
+  animation: consciousnessFloat 6s ease-in-out infinite;
+}
+
+@keyframes consciousnessFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.neuromorphic-rotate {
+  animation: neuromorphicRotate 20s linear infinite;
+}
+
+@keyframes neuromorphicRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.quantum-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Status Indicators */
+.status-active {
+  @apply text-green-400;
+  filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.5));
+}
+
+.status-processing {
+  @apply text-yellow-400;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
+}
+
+.status-error {
+  @apply text-red-400;
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.5));
+}
+
+.status-quantum {
+  @apply text-purple-400;
+  filter: drop-shadow(0 0 4px rgba(168, 85, 247, 0.5));
+}
+
+/* Loading Animations */
+.quantum-loader {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--quantum-border);
+  border-top: 3px solid var(--quantum-primary);
+  border-radius: 50%;
+  animation: quantumSpin 1s linear infinite;
+}
+
+@keyframes quantumSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.consciousness-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.consciousness-ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(120, 119, 198, 0.3);
+  transform: translate(-50%, -50%);
+  animation: ripple 2s infinite;
+}
+
+@keyframes ripple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+  }
+}
+
+/* Typography */
+.quantum-heading {
+  @apply text-4xl font-bold mb-6;
+  background: var(--consciousness-flow);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 10px rgba(120, 119, 198, 0.3));
+}
+
+.neuromorphic-text {
+  @apply font-mono text-sm;
+  color: var(--quantum-text-secondary);
+  letter-spacing: 0.5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .quantum-heading {
+    @apply text-2xl;
+  }
+  
+  .quantum-card {
+    @apply p-4;
+  }
+  
+  .quantum-button {
+    @apply px-4 py-2 text-sm;
+  }
+}
+
+/* Dark Mode Enhancements */
+@media (prefers-color-scheme: dark) {
+  .consciousness-border {
+    background: rgba(15, 15, 35, 0.9);
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  :root {
+    --quantum-border: #666699;
+    --quantum-glow: rgba(120, 119, 198, 0.6);
+  }
+}
+
+/* Quantum Particle Effects */
+.quantum-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--quantum-primary);
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: quantumFloat 10s infinite ease-in-out;
+}
+
+.particle-1 {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+  background: var(--quantum-primary);
+}
+
+.particle-2 {
+  top: 60%;
+  left: 80%;
+  animation-delay: 2s;
+  background: var(--quantum-secondary);
+}
+
+.particle-3 {
+  top: 40%;
+  left: 30%;
+  animation-delay: 4s;
+  background: var(--quantum-accent);
+}
+
+.particle-4 {
+  top: 80%;
+  left: 60%;
+  animation-delay: 6s;
+  background: var(--quantum-primary);
+}
+
+.particle-5 {
+  top: 30%;
+  left: 70%;
+  animation-delay: 8s;
+  background: var(--quantum-secondary);
+}
+
+@keyframes quantumFloat {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-40px) translateX(-10px);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-20px) translateX(15px);
+    opacity: 0.8;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
