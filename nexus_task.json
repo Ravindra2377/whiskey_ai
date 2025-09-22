@@ -1,0 +1,9 @@
+{
+  "type": "CODE_MODIFICATION",
+  "description": "Add a method to get users by email",
+  "createdBy": "ADMIN",
+  "parameters": {
+    "filePath": "src/main/java/com/boozer/controller/UserController.java",
+    "modification": "// Add a new endpoint to get users by email\n@GetMapping(\"/email/{email}\")\npublic ResponseEntity<User> getUserByEmail(@PathVariable String email) {\n    Optional<User> user = userService.getUserByEmail(email);\n    return user.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());\n}"
+  }
+}

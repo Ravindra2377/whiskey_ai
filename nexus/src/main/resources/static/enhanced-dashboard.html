@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHISKEY AI Enhanced Dashboard</title>
+    <link rel="stylesheet" href="jarvis-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Enhanced Dashboard Styling */
+        :root {
+            --enhanced-primary: #8a2be2;
+            --enhanced-secondary: #ff69b4;
+            --enhanced-accent: #00ffff;
+            --enhanced-bg: #0f0c29;
+            --enhanced-text: #ffffff;
+            --enhanced-card: rgba(138, 43, 226, 0.15);
+            --success: #4caf50;
+            --warning: #ff9800;
+            --error: #f44336;
+            --info: #2196f3;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--enhanced-bg), #302b63, #24243e);
+            color: var(--enhanced-text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo h1 {
+            background: linear-gradient(90deg, var(--enhanced-primary), var(--enhanced-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--enhanced-accent);
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        
+        nav {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-link {
+            color: var(--enhanced-text);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(90deg, var(--enhanced-primary), var(--enhanced-secondary));
+            color: white;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+        }
+        
+        .nav-link i {
+            margin-right: 8px;
+        }
+        
+        .welcome {
+            text-align: center;
+            padding: 40px 20px;
+            margin: 20px 0;
+            background: var(--enhanced-card);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+        }
+        
+        .welcome h2 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, var(--enhanced-primary), var(--enhanced-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .welcome p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .stat-card {
+            background: var(--enhanced-card);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(138, 43, 226, 0.3);
+        }
+        
+        .stat-card i {
+            font-size: 3rem;
+            color: var(--enhanced-accent);
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        
+        .stat-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--enhanced-secondary);
+        }
+        
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--enhanced-accent);
+        }
+        
+        .integration-section {
+            background: var(--enhanced-card);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: var(--enhanced-secondary);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .section-title i {
+            color: var(--enhanced-accent);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--enhanced-secondary);
+            box-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, var(--enhanced-primary), var(--enhanced-secondary));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn-accent {
+            background: linear-gradient(90deg, var(--enhanced-accent), #00aaff);
+            color: #0f0c29;
+        }
+        
+        .btn-accent:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results-area {
+            background: var(--enhanced-card);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-left: 4px solid var(--enhanced-secondary);
+        }
+        
+        .result-item.success {
+            border-left-color: var(--success);
+        }
+        
+        .result-item.error {
+            border-left-color: var(--error);
+        }
+        
+        .result-item.warning {
+            border-left-color: var(--warning);
+        }
+        
+        .result-item h4 {
+            color: var(--enhanced-accent);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result-item pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid var(--enhanced-accent);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+            padding-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .tab.active {
+            background: linear-gradient(90deg, var(--enhanced-primary), var(--enhanced-secondary));
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .feature-content {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature-content h4 {
+            color: var(--enhanced-secondary);
+            margin-bottom: 15px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: var(--success);
+        }
+        
+        .notification.error {
+            background: var(--error);
+        }
+        
+        .notification.warning {
+            background: var(--warning);
+        }
+        
+        .notification.info {
+            background: var(--info);
+        }
+        
+        .real-time-updates {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+            z-index: 999;
+        }
+        
+        .real-time-updates h4 {
+            margin-top: 0;
+            color: var(--enhanced-accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .update-item {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+        
+        .update-item:last-child {
+            border-bottom: none;
+        }
+        
+        .update-item .time {
+            color: var(--enhanced-secondary);
+            font-size: 0.8rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--enhanced-primary), var(--enhanced-secondary));
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-crown"></i>
+                <h1>WHISKEY AI Enhanced Dashboard</h1>
+            </div>
+            <nav>
+                <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                <a href="enterprise-dashboard.html" class="nav-link"><i class="fas fa-network-wired"></i> Enterprise Integration</a>
+                <a href="enhanced-dashboard.html" class="nav-link active"><i class="fas fa-star"></i> Enhanced Features</a>
+                <a href="revolutionary-features.html" class="nav-link"><i class="fas fa-bolt"></i> Revolutionary Features</a>
+            </nav>
+        </header>
+        
+        <section class="welcome">
+            <h2><i class="fas fa-star"></i> WHISKEY AI Enhanced Features</h2>
+            <p>Experience the most advanced AI capabilities with stunning beauty, genius intelligence, and magnetic charisma</p>
+        </section>
+        
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <i class="fas fa-tasks"></i>
+                <h3>Tasks Processed</h3>
+                <div class="value" id="tasks-processed">0</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-bee"></i>
+                <h3>Swarm Tasks</h3>
+                <div class="value" id="swarm-tasks">0</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-comment-dots"></i>
+                <h3>NLP Tasks</h3>
+                <div class="value" id="nlp-tasks">0</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-crown"></i>
+                <h3>Supermodel Tasks</h3>
+                <div class="value" id="supermodel-tasks">0</div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="swarm">AI Swarm Intelligence</div>
+            <div class="tab" data-tab="nlp">Natural Language Programming</div>
+            <div class="tab" data-tab="personality">AI Developer Personalities</div>
+            <div class="tab" data-tab="translation">Code Translation</div>
+            <div class="tab" data-tab="healing">Self-Healing</div>
+            <div class="tab" data-tab="dream">Dream Coding</div>
+            <div class="tab" data-tab="vulnerability">Vulnerability Scanner</div>
+            <div class="tab" data-tab="dna">Code DNA Sequencing</div>
+            <div class="tab" data-tab="supermodel">Supermodel Personality</div>
+        </div>
+        
+        <!-- AI Swarm Intelligence Tab -->
+        <div class="tab-content active" id="swarm-tab">
+            <section class="integration-section">
+                <h3 class="section-title"><i class="fas fa-bee"></i> AI Swarm Intelligence</h3>
+                <p>100 specialized AI agents work simultaneously on your problems</p>
+                
+                <div class="form-group">
+                    <label for="swarm-task">Complex Task Description</label>
+                    <textarea id="swarm-task" class="form-control" rows="4" placeholder="Describe a complex task for swarm processing..."></textarea>
+                </div>
+                
+                <button id="swarm-btn" class="btn btn-primary">
+                    <i class="fas fa-bee"></i> Process with AI Swarm
+                </button>
+                
+                <div class="loading" id="swarm-loading">
+                    <div class="spinner"></div>
+                    <p>Processing with AI swarm... This may take a few moments</p>
+                </div>
+            </section>
+        </div>
+        
+        <!-- Natural Language Programming Tab -->
+        <div class="tab-content" id="nlp-tab">
+            <section class="integration-section">
+                <h3 class="section-title"><i class="fas fa-comment-dots"></i> Natural Language Programming</h3>
+                <p>Write code by describing what you want in plain English</p>
+                
+                <div class="form-group">
+                    <label for="nlp-description">Natural Language Description</label>
+                    <textarea id="nlp-description" class="form-control" rows="4" placeholder="Describe what you want to create in plain English..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nlp-language">Target Language</label>
+                    <select id="nlp-language" class="form-control">
+                        <option value="java">Java</option>
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="typescript">TypeScript</option>
+                        <option value="csharp">C#</option>
+                        <option value="go">Go</option>
+                    </select>
+                </div>
+                
+                <button id="nlp-btn" class="btn btn-primary">
+                    <i class="fas fa-code"></i> Generate Code
+                </button>
+                
+                <div class="loading" id="nlp-loading">
+                    <div class="spinner"></div>
+                    <p>Generating code from natural language... This may take a few moments</p>
+                </div>
+            </section>
+        </div>
+        
+        <!-- AI Developer Personalities Tab -->
+        <div class="tab-content" id="personality-tab">
+            <section class="integration-section">
+                <h3 class="section-title"><i class="fas fa-robot"></i> AI Developer Personalities</h3>
+                <p>Choose your AI's personality for the perfect interaction</p>
+                
+                <div class="form-group">
+                    <label for="personality-type">Personality Type</label>
+                    <select id="personality-type" class="form-control">
+                        <option value="mentor">Mentor</option>
+                        <option value="challenger">Challenger</option>
+                        <option value="cheerleader">Cheerleader</option>
+                        <option value="perfectionist">Perfectionist</option>
+                        <option value="minimalist">Minimalist</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="personality-task">Task Description</label>
+                    <textarea id="personality-task" class="form-control" rows="4" placeholder="Describe the task for personality-based processing..."></textarea>
+                </div>
+                
+                <button id="personality-btn" class="btn btn-primary">
+                    <i class="fas fa-robot"></i> Process with Personality
+                </button>
+                
+                <div class="loading" id="personality-loading">
+                    <div class="spinner"></div>
+                    <p>Processing with selected personality... This may take a few moments</p>
+                </div>
+            </section>
+        </div>
+        
+        <!-- Supermodel Personality Tab -->
+        <div class="tab-content" id="supermodel-tab">
+            <section class="integration-section">
+                <h3 class="section-title"><i class="fas fa-crown"></i> Supermodel Personality</h3>
+                <p>Experience WHISKEY AI with stunning beauty, genius intelligence, and magnetic charisma</p>
+                
+                <div class="form-group">
+                    <label for="supermodel-type">Supermodel Personality</label>
+                    <select id="supermodel-type" class="form-control">
+                        <option value="sophisticated">Sophisticated Expert</option>
+                        <option value="creative">Creative Visionary</option>
+                        <option value="strategic">Strategic Leader</option>
+                        <option value="mentor">Elegant Mentor</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="supermodel-task">Task Description</label>
+                    <textarea id="supermodel-task" class="form-control" rows="4" placeholder="Describe the task for supermodel personality processing..."></textarea>
+                </div>
+                
+                <button id="supermodel-btn" class="btn btn-primary">
+                    <i class="fas fa-crown"></i> Activate Supermodel AI
+                </button>
+                
+                <div class="loading" id="supermodel-loading">
+                    <div class="spinner"></div>
+                    <p>Activating supermodel personality... This may take a few moments</p>
+                </div>
+            </section>
+        </div>
+        
+        <!-- Other tabs would be implemented similarly -->
+        
+        <div class="results-area" id="results-area">
+            <h3><i class="fas fa-chart-line"></i> Results</h3>
+            <div id="results-content">
+                <p>No results yet. Execute a task to see results here.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification container -->
+    <div class="notification" id="notification"></div>
+    
+    <!-- Real-time updates panel -->
+    <div class="real-time-updates" id="real-time-updates">
+        <h4><i class="fas fa-bolt"></i> Real-time Updates</h4>
+        <div id="updates-content">
+            <div class="update-item">Dashboard initialized <span class="time">just now</span></div>
+        </div>
+    </div>
+    
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and content
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Show corresponding content
+                const tabName = tab.getAttribute('data-tab');
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+            });
+        });
+        
+        // Notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Add real-time update
+        function addRealTimeUpdate(message) {
+            const updatesContent = document.getElementById('updates-content');
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            
+            const updateItem = document.createElement('div');
+            updateItem.className = 'update-item';
+            updateItem.innerHTML = `${message} <span class="time">${timeString}</span>`;
+            
+            updatesContent.prepend(updateItem);
+            
+            // Keep only the last 10 updates
+            if (updatesContent.children.length > 10) {
+                updatesContent.removeChild(updatesContent.lastChild);
+            }
+        }
+        
+        // Function to display results
+        function displayResults(title, data, type = 'info') {
+            const resultsContent = document.getElementById('results-content');
+            const icon = type === 'success' ? '<i class="fas fa-check-circle" style="color: #4caf50;"></i>' :
+                        type === 'error' ? '<i class="fas fa-exclamation-circle" style="color: #f44336;"></i>' :
+                        type === 'warning' ? '<i class="fas fa-exclamation-triangle" style="color: #ff9800;"></i>' :
+                        '<i class="fas fa-info-circle" style="color: #2196f3;"></i>';
+            
+            resultsContent.innerHTML = `
+                <div class="result-item ${type}">
+                    <h4>${icon} ${title} Results</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+        }
+        
+        // Function to display errors
+        function displayError(title, error) {
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = `
+                <div class="result-item error">
+                    <h4><i class="fas fa-exclamation-circle" style="color: #f44336;"></i> ${title} Error</h4>
+                    <pre style="color: #ff6666;">${error.message || error}</pre>
+                </div>
+            `;
+        }
+        
+        // AI Swarm Intelligence button click handler
+        document.getElementById('swarm-btn').addEventListener('click', async () => {
+            const taskDescription = document.getElementById('swarm-task').value;
+            
+            if (!taskDescription) {
+                showNotification('Please enter a task description', 'error');
+                return;
+            }
+            
+            // Show loading indicator
+            document.getElementById('swarm-loading').style.display = 'block';
+            document.getElementById('swarm-btn').disabled = true;
+            
+            try {
+                addRealTimeUpdate('Submitting swarm task');
+                showNotification('Submitting swarm task', 'info');
+                
+                const response = await fetch('/api/nexus/enhanced/swarm-task', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        description: taskDescription,
+                        type: 'CODE_MODIFICATION',
+                        createdBy: 'enhanced_dashboard'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'SUCCESS') {
+                    // Update stats
+                    const currentCount = parseInt(document.getElementById('swarm-tasks').textContent);
+                    document.getElementById('swarm-tasks').textContent = currentCount + 1;
+                    
+                    addRealTimeUpdate('Swarm task submitted successfully');
+                    showNotification('Swarm task submitted successfully!', 'success');
+                    displayResults('AI Swarm Intelligence', result, 'success');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                addRealTimeUpdate('Swarm task failed');
+                showNotification('Swarm task failed: ' + error.message, 'error');
+                displayError('AI Swarm Intelligence', error);
+            } finally {
+                // Hide loading indicator
+                document.getElementById('swarm-loading').style.display = 'none';
+                document.getElementById('swarm-btn').disabled = false;
+            }
+        });
+        
+        // Natural Language Programming button click handler
+        document.getElementById('nlp-btn').addEventListener('click', async () => {
+            const description = document.getElementById('nlp-description').value;
+            const language = document.getElementById('nlp-language').value;
+            
+            if (!description) {
+                showNotification('Please enter a description', 'error');
+                return;
+            }
+            
+            // Show loading indicator
+            document.getElementById('nlp-loading').style.display = 'block';
+            document.getElementById('nlp-btn').disabled = true;
+            
+            try {
+                addRealTimeUpdate('Generating code from natural language');
+                showNotification('Generating code from natural language', 'info');
+                
+                const response = await fetch('/api/nexus/enhanced/natural-language', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        description: description,
+                        language: language
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'SUCCESS') {
+                    // Update stats
+                    const currentCount = parseInt(document.getElementById('nlp-tasks').textContent);
+                    document.getElementById('nlp-tasks').textContent = currentCount + 1;
+                    
+                    addRealTimeUpdate('Code generated successfully');
+                    showNotification('Code generated successfully!', 'success');
+                    displayResults('Natural Language Programming', result, 'success');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                addRealTimeUpdate('Code generation failed');
+                showNotification('Code generation failed: ' + error.message, 'error');
+                displayError('Natural Language Programming', error);
+            } finally {
+                // Hide loading indicator
+                document.getElementById('nlp-loading').style.display = 'none';
+                document.getElementById('nlp-btn').disabled = false;
+            }
+        });
+        
+        // AI Developer Personalities button click handler
+        document.getElementById('personality-btn').addEventListener('click', async () => {
+            const personality = document.getElementById('personality-type').value;
+            const taskDescription = document.getElementById('personality-task').value;
+            
+            if (!taskDescription) {
+                showNotification('Please enter a task description', 'error');
+                return;
+            }
+            
+            // Show loading indicator
+            document.getElementById('personality-loading').style.display = 'block';
+            document.getElementById('personality-btn').disabled = true;
+            
+            try {
+                addRealTimeUpdate(`Processing task with ${personality} personality`);
+                showNotification(`Processing task with ${personality} personality`, 'info');
+                
+                const response = await fetch('/api/nexus/enhanced/personality-task', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        personality: personality,
+                        task: taskDescription,
+                        type: 'CODE_MODIFICATION'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'SUCCESS') {
+                    addRealTimeUpdate('Personality task processed successfully');
+                    showNotification('Personality task processed successfully!', 'success');
+                    displayResults('AI Developer Personalities', result, 'success');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                addRealTimeUpdate('Personality task failed');
+                showNotification('Personality task failed: ' + error.message, 'error');
+                displayError('AI Developer Personalities', error);
+            } finally {
+                // Hide loading indicator
+                document.getElementById('personality-loading').style.display = 'none';
+                document.getElementById('personality-btn').disabled = false;
+            }
+        });
+        
+        // Supermodel Personality button click handler
+        document.getElementById('supermodel-btn').addEventListener('click', async () => {
+            const personality = document.getElementById('supermodel-type').value;
+            const taskDescription = document.getElementById('supermodel-task').value;
+            
+            if (!taskDescription) {
+                showNotification('Please enter a task description', 'error');
+                return;
+            }
+            
+            // Show loading indicator
+            document.getElementById('supermodel-loading').style.display = 'block';
+            document.getElementById('supermodel-btn').disabled = true;
+            
+            try {
+                addRealTimeUpdate(`Activating ${personality} supermodel personality`);
+                showNotification(`Activating ${personality} supermodel personality`, 'info');
+                
+                const response = await fetch('/api/nexus/enhanced/supermodel-task', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        personality: personality,
+                        task: taskDescription,
+                        type: 'CODE_MODIFICATION'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'SUCCESS') {
+                    // Update stats
+                    const currentCount = parseInt(document.getElementById('supermodel-tasks').textContent);
+                    document.getElementById('supermodel-tasks').textContent = currentCount + 1;
+                    
+                    addRealTimeUpdate('Supermodel personality activated successfully');
+                    showNotification('Supermodel personality activated successfully!', 'success');
+                    displayResults('Supermodel Personality', result, 'success');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                addRealTimeUpdate('Supermodel personality activation failed');
+                showNotification('Supermodel personality activation failed: ' + error.message, 'error');
+                displayError('Supermodel Personality', error);
+            } finally {
+                // Hide loading indicator
+                document.getElementById('supermodel-loading').style.display = 'none';
+                document.getElementById('supermodel-btn').disabled = false;
+            }
+        });
+        
+        // Initialize with some demo data
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add initial real-time updates
+            setTimeout(() => {
+                addRealTimeUpdate('Enhanced dashboard initialized');
+                addRealTimeUpdate('Ready for advanced AI features');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

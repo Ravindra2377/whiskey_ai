@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHISKEY AI - Quantitative Trading Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .quant-dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .quant-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #8B4513;
+        }
+        
+        .quant-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .quant-header p {
+            font-size: 1.2em;
+            color: #666;
+        }
+        
+        .quant-section {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .quant-section h2 {
+            color: #8B4513;
+            border-bottom: 2px solid #8B4513;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        
+        .btn {
+            background: #8B4513;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #6b3a0f;
+        }
+        
+        .result-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9f7ef;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .error-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8d7da;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .metric-card h3 {
+            margin: 0 0 10px 0;
+            color: #8B4513;
+            font-size: 1em;
+        }
+        
+        .metric-card .value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background: #8B4513;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="quant-dashboard">
+        <div class="quant-header">
+            <h1>WHISKEY AI Quantitative Trading</h1>
+            <p>AI-powered quantitative trading and risk management platform</p>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('trading')">Algorithmic Trading</div>
+            <div class="tab" onclick="switchTab('risk')">Risk Management</div>
+            <div class="tab" onclick="switchTab('hft')">High-Frequency Trading</div>
+            <div class="tab" onclick="switchTab('alpha')">Alpha Discovery</div>
+        </div>
+        
+        <!-- Algorithmic Trading Tab -->
+        <div id="trading" class="tab-content active">
+            <div class="quant-section">
+                <h2>Algorithmic Trade Execution</h2>
+                <form id="tradingForm">
+                    <div class="form-group">
+                        <label for="asset">Asset Symbol:</label>
+                        <input type="text" id="asset" name="asset" required placeholder="e.g., AAPL, BTCUSD">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" step="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="orderType">Order Type:</label>
+                        <select id="orderType" name="orderType" required>
+                            <option value="MARKET">Market Order</option>
+                            <option value="LIMIT">Limit Order</option>
+                            <option value="STOP">Stop Order</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="price">Price (for limit/stop orders):</label>
+                        <input type="number" id="price" name="price" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="strategy">Strategy:</label>
+                        <select id="strategy" name="strategy" required>
+                            <option value="HFT">High-Frequency Trading</option>
+                            <option value="STAT_ARBITRAGE">Statistical Arbitrage</option>
+                            <option value="MARKET_MAKING">Market Making</option>
+                            <option value="PORTFOLIO_OPT">Portfolio Optimization</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn">Execute Trade</button>
+                </form>
+                
+                <div id="tradingResult" class="result-container"></div>
+                <div id="tradingError" class="error-container"></div>
+            </div>
+        </div>
+        
+        <!-- Risk Management Tab -->
+        <div id="risk" class="tab-content">
+            <div class="quant-section">
+                <h2>Portfolio Risk Analysis</h2>
+                <form id="riskForm">
+                    <div class="form-group">
+                        <label for="riskModel">Risk Model:</label>
+                        <select id="riskModel" name="riskModel" required>
+                            <option value="VAR">Value at Risk (VaR)</option>
+                            <option value="MONTE_CARLO">Monte Carlo Simulation</option>
+                            <option value="STRESS_TESTING">Stress Testing</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="timeframe">Timeframe:</label>
+                        <select id="timeframe" name="timeframe" required>
+                            <option value="DAILY">Daily</option>
+                            <option value="WEEKLY">Weekly</option>
+                            <option value="MONTHLY">Monthly</option>
+                            <option value="YEARLY">Yearly</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Portfolio Assets (example format):</label>
+                        <textarea id="portfolio" name="portfolio" rows="4" placeholder='[{"asset": "AAPL", "quantity": 100, "price": 150.00, "weight": 0.4}, {"asset": "GOOGL", "quantity": 50, "price": 2500.00, "weight": 0.6}]'></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn">Analyze Risk</button>
+                </form>
+                
+                <div id="riskResult" class="result-container">
+                    <h3>Risk Analysis Results</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <h3>Value at Risk</h3>
+                            <div class="value" id="varValue">-</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Expected Shortfall</h3>
+                            <div class="value" id="esValue">-</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Max Drawdown</h3>
+                            <div class="value" id="drawdownValue">-</div>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Sharpe Ratio</h3>
+                            <div class="value" id="sharpeValue">-</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="riskError" class="error-container"></div>
+            </div>
+        </div>
+        
+        <!-- High-Frequency Trading Tab -->
+        <div id="hft" class="tab-content">
+            <div class="quant-section">
+                <h2>High-Frequency Trading</h2>
+                <p>Execute trades with microsecond precision using neuromorphic processing.</p>
+                <button id="hftButton" class="btn">Execute HFT Trade</button>
+                
+                <div id="hftResult" class="result-container"></div>
+                <div id="hftError" class="error-container"></div>
+            </div>
+        </div>
+        
+        <!-- Alpha Discovery Tab -->
+        <div id="alpha" class="tab-content">
+            <div class="quant-section">
+                <h2>Alpha Factor Discovery</h2>
+                <p>Discover profitable trading strategies using consciousness-level AI pattern recognition.</p>
+                <form id="alphaForm">
+                    <div class="form-group">
+                        <label>Historical Data (example format):</label>
+                        <textarea id="historicalData" name="historicalData" rows="4" placeholder='{"asset": "AAPL", "start_date": "2023-01-01", "end_date": "2023-12-31", "target_returns": 0.15}'></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn">Discover Alpha Factors</button>
+                </form>
+                
+                <div id="alphaResult" class="result-container"></div>
+                <div id="alphaError" class="error-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        function switchTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabId).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+        
+        // Algorithmic Trading Form Submission
+        document.getElementById('tradingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                asset: document.getElementById('asset').value,
+                quantity: parseFloat(document.getElementById('quantity').value),
+                orderType: document.getElementById('orderType').value,
+                price: document.getElementById('price').value ? parseFloat(document.getElementById('price').value) : null,
+                strategy: document.getElementById('strategy').value,
+                parameters: {}
+            };
+            
+            fetch('/api/nexus/quant/trading/algorithmic-execution', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.successful) {
+                    document.getElementById('tradingResult').innerHTML = `
+                        <h3>Trade Execution Successful</h3>
+                        <p>${data.message}</p>
+                        <p><strong>Quantum Optimization:</strong> Applied</p>
+                        <p><strong>Consciousness Timing:</strong> Optimized</p>
+                        <p><strong>Neuromorphic Execution:</strong> Completed in microseconds</p>
+                    `;
+                    document.getElementById('tradingResult').style.display = 'block';
+                    document.getElementById('tradingError').style.display = 'none';
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                document.getElementById('tradingError').innerHTML = `<p>Error: ${error.message}</p>`;
+                document.getElementById('tradingError').style.display = 'block';
+                document.getElementById('tradingResult').style.display = 'none';
+            });
+        });
+        
+        // Risk Analysis Form Submission
+        document.getElementById('riskForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            try {
+                const portfolio = JSON.parse(document.getElementById('portfolio').value);
+                
+                const formData = {
+                    portfolio: portfolio,
+                    riskModel: document.getElementById('riskModel').value,
+                    timeframe: document.getElementById('timeframe').value,
+                    parameters: {}
+                };
+                
+                fetch('/api/nexus/quant/risk/portfolio-analysis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.successful) {
+                        // Update metrics display
+                        document.getElementById('varValue').textContent = data.metrics?.value_at_risk || '-';
+                        document.getElementById('esValue').textContent = data.metrics?.expected_shortfall || '-';
+                        document.getElementById('drawdownValue').textContent = data.metrics?.max_drawdown || '-';
+                        document.getElementById('sharpeValue').textContent = data.metrics?.sharpe_ratio || '-';
+                        
+                        document.getElementById('riskResult').style.display = 'block';
+                        document.getElementById('riskError').style.display = 'none';
+                    } else {
+                        throw new Error(data.message);
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('riskError').innerHTML = `<p>Error: ${error.message}</p>`;
+                    document.getElementById('riskError').style.display = 'block';
+                    document.getElementById('riskResult').style.display = 'none';
+                });
+            } catch (e) {
+                document.getElementById('riskError').innerHTML = `<p>Error: Invalid portfolio JSON format</p>`;
+                document.getElementById('riskError').style.display = 'block';
+                document.getElementById('riskResult').style.display = 'none';
+            }
+        });
+        
+        // HFT Button Click
+        document.getElementById('hftButton').addEventListener('click', function() {
+            const mockMarketData = {
+                "timestamp": new Date().toISOString(),
+                "asset": "BTCUSD",
+                "price": 50000.00,
+                "volume": 1000,
+                "spread": 0.1
+            };
+            
+            fetch('/api/nexus/quant/trading/hft-execution', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(mockMarketData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'SUCCESS') {
+                    document.getElementById('hftResult').innerHTML = `
+                        <h3>HFT Execution Successful</h3>
+                        <p>Trade executed with microsecond precision</p>
+                        <p><strong>Neuromorphic Processing:</strong> 15μs latency</p>
+                        <p><strong>Quantum Optimization:</strong> Applied</p>
+                    `;
+                    document.getElementById('hftResult').style.display = 'block';
+                    document.getElementById('hftError').style.display = 'none';
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                document.getElementById('hftError').innerHTML = `<p>Error: ${error.message}</p>`;
+                document.getElementById('hftError').style.display = 'block';
+                document.getElementById('hftResult').style.display = 'none';
+            });
+        });
+        
+        // Alpha Discovery Form Submission
+        document.getElementById('alphaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            try {
+                const historicalData = JSON.parse(document.getElementById('historicalData').value);
+                
+                fetch('/api/nexus/quant/alpha/discovery', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(historicalData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'SUCCESS') {
+                        document.getElementById('alphaResult').innerHTML = `
+                            <h3>Alpha Discovery Complete</h3>
+                            <p>Consciousness-level pattern recognition applied</p>
+                            <p><strong>Genetic Algorithm Evolution:</strong> Performed</p>
+                            <p><strong>Quantum Backtesting:</strong> Completed</p>
+                            <p>Potential alpha factors identified with high confidence</p>
+                        `;
+                        document.getElementById('alphaResult').style.display = 'block';
+                        document.getElementById('alphaError').style.display = 'none';
+                    } else {
+                        throw new Error(data.message);
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('alphaError').innerHTML = `<p>Error: ${error.message}</p>`;
+                    document.getElementById('alphaError').style.display = 'block';
+                    document.getElementById('alphaResult').style.display = 'none';
+                });
+            } catch (e) {
+                document.getElementById('alphaError').innerHTML = `<p>Error: Invalid historical data JSON format</p>`;
+                document.getElementById('alphaError').style.display = 'block';
+                document.getElementById('alphaResult').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+# Advanced WHISKEY AI Enhancement Dependencies
+opencv-python>=4.5.0
+speechrecognition>=3.8.1
+pyttsx3>=2.90
+pytesseract>=0.3.7
+textblob>=0.15.3
+cryptography>=3.4.8
+psutil>=5.8.0
+numpy>=1.21.0
+pandas>=1.3.0
+scikit-learn>=1.0.0

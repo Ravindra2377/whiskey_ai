@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # Main application service
+  nexus-ai:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/nexus_ai
+      - REDIS_URL=redis://redis:6379
+      - MONGO_URL=mongodb://mongo:27017/nexus_ai
+    depends_on:
+      - db
+      - redis
+      - mongo
+    volumes:
+      - ./logs:/app/logs
+
+  # PostgreSQL database for main data
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: nexus_ai
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # MongoDB for logs
+  mongo:
+    image: mongo:6
+    environment:
+      MONGO_INITDB_DATABASE: nexus_ai
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+
+  # Adminer for database management
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
+  redis_data:
+  mongo_data:

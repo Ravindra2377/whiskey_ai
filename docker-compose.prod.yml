@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  nexus-ai-app:
+    image: openjdk:17-jdk-slim
+    ports:
+      - "80:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=postgres
+      - DB_USERNAME=nexus_admin
+      - DB_PASSWORD=SecurePassword123!
+      - REDIS_HOST=redis
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    volumes:
+      - ./target:/app
+    working_dir: /app
+    command: java -jar nexus-ai-*.jar
+    networks:
+      - nexus-network
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: nexus_ai
+      POSTGRES_USER: nexus_admin
+      POSTGRES_PASSWORD: SecurePassword123!
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - nexus-network
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - nexus-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  nexus-network:
+    driver: bridge

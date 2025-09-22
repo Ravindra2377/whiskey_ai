@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHISKEY AI Developer Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .developer-dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .developer-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #8B4513;
+        }
+        
+        .developer-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .developer-header p {
+            font-size: 1.2em;
+            color: #666;
+        }
+        
+        .developer-section {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .developer-section h2 {
+            color: #8B4513;
+            border-bottom: 2px solid #8B4513;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        
+        .btn {
+            background: #8B4513;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #6b3a0f;
+        }
+        
+        .result-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9f7ef;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .error-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8d7da;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background: #8B4513;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .capability-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .capability-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .capability-card h3 {
+            color: #8B4513;
+            margin-top: 0;
+        }
+        
+        .capability-card ul {
+            padding-left: 20px;
+        }
+        
+        .capability-card li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="developer-dashboard">
+        <div class="developer-header">
+            <h1>WHISKEY AI Developer Platform</h1>
+            <p>Practical AI Development with Human-AI Collaboration</p>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('training')">Model Training</div>
+            <div class="tab" onclick="switchTab('onboarding')">Client Onboarding</div>
+            <div class="tab" onclick="switchTab('capabilities')">Capabilities</div>
+        </div>
+        
+        <!-- Model Training Tab -->
+        <div id="training" class="tab-content active">
+            <div class="developer-section">
+                <h2>AI Model Training</h2>
+                <form id="trainingForm">
+                    <div class="form-group">
+                        <label for="domain">Domain:</label>
+                        <select id="domain" name="domain" required>
+                            <option value="">Select a domain</option>
+                            <option value="database">Database Optimization</option>
+                            <option value="cloud">Cloud Infrastructure</option>
+                            <option value="security">Security Analysis</option>
+                            <option value="devops">DevOps Automation</option>
+                            <option value="api">API Integration</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modelName">Model Name:</label>
+                        <input type="text" id="modelName" name="modelName" required placeholder="e.g., DatabaseOptimizer-v1.0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="trainingData">Training Data:</label>
+                        <textarea id="trainingData" name="trainingData" rows="4" required placeholder="Enter training data or dataset reference"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientId">Client ID (optional):</label>
+                        <input type="text" id="clientId" name="clientId" placeholder="For client-specific models">
+                    </div>
+                    
+                    <button type="submit" class="btn">Start Training</button>
+                </form>
+                
+                <div id="trainingResult" class="result-container"></div>
+                <div id="trainingError" class="error-container"></div>
+            </div>
+        </div>
+        
+        <!-- Client Onboarding Tab -->
+        <div id="onboarding" class="tab-content">
+            <div class="developer-section">
+                <h2>Client Onboarding</h2>
+                <form id="onboardingForm">
+                    <div class="form-group">
+                        <label for="clientName">Client Name:</label>
+                        <input type="text" id="clientName" name="clientName" required placeholder="e.g., TechCorp Inc.">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientEmail">Client Email:</label>
+                        <input type="email" id="clientEmail" name="clientEmail" required placeholder="contact@techcorp.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientIndustry">Industry:</label>
+                        <select id="clientIndustry" name="clientIndustry" required>
+                            <option value="">Select an industry</option>
+                            <option value="technology">Technology</option>
+                            <option value="finance">Finance</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="retail">Retail</option>
+                            <option value="manufacturing">Manufacturing</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subscriptionTier">Subscription Tier:</label>
+                        <select id="subscriptionTier" name="subscriptionTier" required>
+                            <option value="">Select a tier</option>
+                            <option value="starter">Starter ($2,000/month)</option>
+                            <option value="professional">Professional ($8,000/month)</option>
+                            <option value="enterprise">Enterprise ($25,000/month)</option>
+                            <option value="global">Global Enterprise ($75,000/month)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Required Capabilities:</label>
+                        <div>
+                            <input type="checkbox" id="database" name="capabilities" value="database">
+                            <label for="database">Database Specialist</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="cloud" name="capabilities" value="cloud">
+                            <label for="cloud">Cloud Infrastructure</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="security" name="capabilities" value="security">
+                            <label for="security">Security Analysis</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="devops" name="capabilities" value="devops">
+                            <label for="devops">DevOps Automation</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="api" name="capabilities" value="api">
+                            <label for="api">API Integration</label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn">Onboard Client</button>
+                </form>
+                
+                <div id="onboardingResult" class="result-container"></div>
+                <div id="onboardingError" class="error-container"></div>
+            </div>
+        </div>
+        
+        <!-- Capabilities Tab -->
+        <div id="capabilities" class="tab-content">
+            <div class="developer-section">
+                <h2>Platform Capabilities</h2>
+                <div class="capability-grid">
+                    <div class="capability-card">
+                        <h3>Model Training</h3>
+                        <ul>
+                            <li>Specialized AI models for different technical domains</li>
+                            <li>Fine-tuning based on client feedback</li>
+                            <li>Continuous improvement through learning</li>
+                            <li>Integration with enterprise systems</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="capability-card">
+                        <h3>Client Onboarding</h3>
+                        <ul>
+                            <li>Automated tenant environment creation</li>
+                            <li>Specialized AI agent deployment</li>
+                            <li>Monitoring and analytics setup</li>
+                            <li>Isolated client environments</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="capability-card">
+                        <h3>Technical Support</h3>
+                        <ul>
+                            <li>24/7 automated issue resolution</li>
+                            <li>Specialized agents for different domains</li>
+                            <li>Escalation to human experts when needed</li>
+                            <li>Proactive system monitoring</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="capability-card">
+                        <h3>Human-AI Collaboration</h3>
+                        <ul>
+                            <li>Developers focus on AI improvement</li>
+                            <li>AI handles routine technical tasks</li>
+                            <li>Combined expertise for complex issues</li>
+                            <li>Scalable service delivery</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        function switchTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabId).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+        
+        // Model Training Form Submission
+        document.getElementById('trainingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                domain: document.getElementById('domain').value,
+                modelName: document.getElementById('modelName').value,
+                trainingData: document.getElementById('trainingData').value,
+                clientId: document.getElementById('clientId').value || null
+            };
+            
+            fetch('/api/nexus/developer/ai-models/train', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'SUCCESS' || data.jobId) {
+                    document.getElementById('trainingResult').innerHTML = `
+                        <h3>Model Training Started</h3>
+                        <p><strong>Job ID:</strong> ${data.jobId}</p>
+                        <p><strong>Estimated Completion:</strong> ${new Date(data.estimatedCompletion).toLocaleString()}</p>
+                        <p><strong>Status:</strong> Training in progress</p>
+                    `;
+                    document.getElementById('trainingResult').style.display = 'block';
+                    document.getElementById('trainingError').style.display = 'none';
+                } else {
+                    throw new Error(data.message || 'Failed to start training');
+                }
+            })
+            .catch(error => {
+                document.getElementById('trainingError').innerHTML = `<p>Error: ${error.message}</p>`;
+                document.getElementById('trainingError').style.display = 'block';
+                document.getElementById('trainingResult').style.display = 'none';
+            });
+        });
+        
+        // Client Onboarding Form Submission
+        document.getElementById('onboardingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get selected capabilities
+            const capabilities = [];
+            document.querySelectorAll('input[name="capabilities"]:checked').forEach(checkbox => {
+                capabilities.push(checkbox.value);
+            });
+            
+            const formData = {
+                clientName: document.getElementById('clientName').value,
+                clientEmail: document.getElementById('clientEmail').value,
+                clientIndustry: document.getElementById('clientIndustry').value,
+                subscriptionTier: document.getElementById('subscriptionTier').value,
+                requiredCapabilities: capabilities,
+                contactPerson: document.getElementById('clientName').value,
+                companySize: "Unknown"
+            };
+            
+            fetch('/api/nexus/developer/clients/onboard', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'SUCCESS' || data.tenantId) {
+                    document.getElementById('onboardingResult').innerHTML = `
+                        <h3>Client Onboarded Successfully</h3>
+                        <p><strong>Tenant ID:</strong> ${data.tenantId}</p>
+                        <p><strong>Deployed Capabilities:</strong> ${data.deployedCapabilities.join(', ')}</p>
+                        <p><strong>Dashboard URL:</strong> <a href="${data.dashboardUrl}" target="_blank">${data.dashboardUrl}</a></p>
+                    `;
+                    document.getElementById('onboardingResult').style.display = 'block';
+                    document.getElementById('onboardingError').style.display = 'none';
+                } else {
+                    throw new Error(data.message || 'Failed to onboard client');
+                }
+            })
+            .catch(error => {
+                document.getElementById('onboardingError').innerHTML = `<p>Error: ${error.message}</p>`;
+                document.getElementById('onboardingError').style.display = 'block';
+                document.getElementById('onboardingResult').style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

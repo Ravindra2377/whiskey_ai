@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHISKEY AI - WHISKEY Interface</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="jarvis-style.css">
+</head>
+<body class="whiskey-body">
+    <!-- Background Matrix/Particles Effect -->
+    <div id="matrix-background"></div>
+    
+    <!-- Main WHISKEY Interface -->
+    <div class="whiskey-container">
+        <!-- Header HUD -->
+        <header class="whiskey-header">
+            <div class="header-left">
+                <div class="whiskey-logo">
+                    <div class="logo-circle">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <span class="logo-text">WHISKEY AI</span>
+                </div>
+                <div class="system-status">
+                    <div class="status-indicator online"></div>
+                    <span>FULLY OPERATIONAL</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="time-display">
+                    <div id="current-time"></div>
+                    <div id="current-date"></div>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="system-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">CPU</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 45%"></div>
+                        </div>
+                        <span class="stat-value">45%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">MEM</span>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 62%"></div>
+                        </div>
+                        <span class="stat-value">62%</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Interface Grid -->
+        <main class="whiskey-main">
+            <!-- Left Panel - AI Status & Controls -->
+            <section class="left-panel">
+                <!-- AI Avatar/Status -->
+                <div class="ai-avatar-container">
+                    <div class="ai-avatar">
+                        <div class="avatar-rings">
+                            <div class="ring ring-1"></div>
+                            <div class="ring ring-2"></div>
+                            <div class="ring ring-3"></div>
+                        </div>
+                        <div class="avatar-core">
+                            <div class="core-pulse"></div>
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <div class="voice-indicator" id="voiceIndicator">
+                            <div class="voice-wave"></div>
+                            <div class="voice-wave"></div>
+                            <div class="voice-wave"></div>
+                        </div>
+                    </div>
+                    <div class="ai-status-text">
+                        <h3>WHISKEY AI STATUS</h3>
+                        <p id="aiStatusText">Ready for commands, sir.</p>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h4>QUICK DEPLOY</h4>
+                    <div class="action-grid">
+                        <button class="action-btn" onclick="executeCommand('generate code')">
+                            <i class="fas fa-code"></i>
+                            <span>Code Gen</span>
+                        </button>
+                        <button class="action-btn" onclick="executeCommand('deploy app')">
+                            <i class="fas fa-rocket"></i>
+                            <span>Deploy</span>
+                        </button>
+                        <button class="action-btn" onclick="executeCommand('run tests')">
+                            <i class="fas fa-vial"></i>
+                            <span>Test</span>
+                        </button>
+                        <button class="action-btn" onclick="executeCommand('scan security')">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Security</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Tasks -->
+                <div class="active-tasks">
+                    <h4>ACTIVE PROCESSES</h4>
+                    <div class="tasks-list" id="activeTasks">
+                        <div class="task-item">
+                            <div class="task-icon">
+                                <i class="fas fa-cog fa-spin"></i>
+                            </div>
+                            <div class="task-info">
+                                <span class="task-name">Code Analysis</span>
+                                <div class="task-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 75%"></div>
+                                    </div>
+                                    <span class="progress-text">75%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Center Panel - Main Display -->
+            <section class="center-panel">
+                <!-- Command Interface -->
+                <div class="command-interface">
+                    <div class="command-display" id="commandDisplay">
+                        <div class="welcome-message">
+                            <h2>WHISKEY AI COMMAND CENTER</h2>
+                            <p>Advanced AI Development Assistant</p>
+                            <div class="capability-icons">
+                                <div class="capability-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>Computer Vision</span>
+                                </div>
+                                <div class="capability-item">
+                                    <i class="fas fa-microphone"></i>
+                                    <span>Voice Control</span>
+                                </div>
+                                <div class="capability-item">
+                                    <i class="fas fa-brain"></i>
+                                    <span>Multi-Agent AI</span>
+                                </div>
+                                <div class="capability-item">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Security Scan</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Interface -->
+                <div class="chat-interface">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message ai-message">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="sender-name">WHISKEY AI</span>
+                                    <span class="message-time">Just now</span>
+                                </div>
+                                <div class="message-text">
+                                    Good evening. WHISKEY AI systems are online and ready for deployment. How may I assist you with your development needs today?
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Input Area -->
+                    <div class="input-container">
+                        <div class="input-wrapper">
+                            <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceInput()">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <input type="text" 
+                                   id="commandInput" 
+                                   placeholder="Enter command or speak naturally..."
+                                   autocomplete="off">
+                            <button class="send-btn" onclick="sendCommand()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <div class="input-suggestions" id="inputSuggestions">
+                            <span class="suggestion" onclick="selectSuggestion('Generate a React component')">Generate React component</span>
+                            <span class="suggestion" onclick="selectSuggestion('Deploy to production')">Deploy to production</span>
+                            <span class="suggestion" onclick="selectSuggestion('Review code quality')">Review code quality</span>
+                            <span class="suggestion" onclick="selectSuggestion('Run security scan')">Run security scan</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel - System Monitoring -->
+            <section class="right-panel">
+                <!-- System Health -->
+                <div class="system-health">
+                    <h4>SYSTEM HEALTH</h4>
+                    <div class="health-grid">
+                        <div class="health-item">
+                            <div class="health-icon">
+                                <i class="fas fa-server"></i>
+                            </div>
+                            <div class="health-info">
+                                <span class="health-label">Services</span>
+                                <span class="health-value online">8/8 Online</span>
+                            </div>
+                        </div>
+                        <div class="health-item">
+                            <div class="health-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="health-info">
+                                <span class="health-label">Database</span>
+                                <span class="health-value online">Optimal</span>
+                            </div>
+                        </div>
+                        <div class="health-item">
+                            <div class="health-icon">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                            <div class="health-info">
+                                <span class="health-label">AI Models</span>
+                                <span class="health-value online">Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-time Metrics -->
+                <div class="metrics-display">
+                    <h4>PERFORMANCE METRICS</h4>
+                    <div class="metric-item">
+                        <div class="metric-header">
+                            <span>Response Time</span>
+                            <span class="metric-value">145ms</span>
+                        </div>
+                        <div class="metric-chart">
+                            <canvas id="responseTimeChart" width="250" height="60"></canvas>
+                        </div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-header">
+                            <span>Success Rate</span>
+                            <span class="metric-value">96.8%</span>
+                        </div>
+                        <div class="metric-chart">
+                            <canvas id="successRateChart" width="250" height="60"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="recent-activity">
+                    <h4>RECENT ACTIVITY</h4>
+                    <div class="activity-list" id="activityList">
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <div class="activity-info">
+                                <span class="activity-text">Generated React component</span>
+                                <span class="activity-time">2m ago</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="activity-info">
+                                <span class="activity-text">Security scan completed</span>
+                                <span class="activity-time">5m ago</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <div class="activity-info">
+                                <span class="activity-text">Deployment successful</span>
+                                <span class="activity-time">12m ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Advanced Features -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Advanced AI Features</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-eye"></i>
+                        <h4>Computer Vision</h4>
+                        <p>Analyze code screenshots and UI mockups</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-users"></i>
+                        <h4>Multi-Agent AI</h4>
+                        <p>Specialized AI agents working together</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-heart"></i>
+                        <h4>Emotional Intelligence</h4>
+                        <p>Understanding team emotions and stress</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-atom"></i>
+                        <h4>Quantum Processing</h4>
+                        <p>Exponentially faster optimization</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="jarvis-script.js"></script>
+</body>
+</html>

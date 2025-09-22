@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHISKEY AI - Technical Services</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .service-card {
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .result-panel {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        .loading {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center mb-5">WHISKEY AI Technical Services</h1>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Performance Optimization Card -->
+            <div class="col-md-4">
+                <div class="card service-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Performance Optimization</h5>
+                        <p class="card-text">Get recommendations for optimizing system performance.</p>
+                        <button class="btn btn-primary" onclick="optimizePerformance()">Analyze Performance</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Security Scan Card -->
+            <div class="col-md-4">
+                <div class="card service-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Security Scan</h5>
+                        <p class="card-text">Scan for vulnerabilities and security issues.</p>
+                        <button class="btn btn-primary" onclick="scanSecurity()">Scan Security</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Code Refactoring Card -->
+            <div class="col-md-4">
+                <div class="card service-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Code Refactoring</h5>
+                        <p class="card-text">Get suggestions for improving code quality.</p>
+                        <button class="btn btn-primary" onclick="refactorCode()">Refactor Code</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <!-- Infrastructure Scaling Card -->
+            <div class="col-md-4">
+                <div class="card service-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Infrastructure Scaling</h5>
+                        <p class="card-text">Get recommendations for scaling infrastructure.</p>
+                        <button class="btn btn-primary" onclick="scaleInfrastructure()">Scale Infrastructure</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- API Integration Card -->
+            <div class="col-md-4">
+                <div class="card service-card">
+                    <div class="card-body">
+                        <h5 class="card-title">API Integration</h5>
+                        <p class="card-text">Get assistance with API integration.</p>
+                        <button class="btn btn-primary" onclick="integrateApi()">Integrate API</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Client Management Card -->
+            <div class="col-md-4">
+                <div class="card service-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Client Management</h5>
+                        <p class="card-text">Onboard new enterprise clients.</p>
+                        <button class="btn btn-primary" onclick="onboardClient()">Onboard Client</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading indicator -->
+        <div id="loading" class="loading text-center mt-4">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Processing...</span>
+            </div>
+            <p>Processing request...</p>
+        </div>
+        
+        <!-- Results panel -->
+        <div id="resultPanel" class="result-panel">
+            <h4>Results</h4>
+            <pre id="resultContent"></pre>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const BASE_URL = '/api/whiskey/enterprise';
+        
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultPanel').style.display = 'none';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        function showResult(result) {
+            document.getElementById('resultContent').textContent = JSON.stringify(result, null, 2);
+            document.getElementById('resultPanel').style.display = 'block';
+        }
+        
+        function optimizePerformance() {
+            showLoading();
+            
+            const payload = {
+                systemId: "WEB-001",
+                systemType: "api",
+                currentMetrics: {
+                    cpuUsage: 75,
+                    memoryUsage: 68,
+                    responseTime: 420
+                }
+            };
+            
+            fetch(BASE_URL + '/optimize-performance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                showResult(data);
+            })
+            .catch(error => {
+                hideLoading();
+                showResult({error: error.message});
+            });
+        }
+        
+        function scanSecurity() {
+            showLoading();
+            
+            const payload = {
+                systemId: "APP-002",
+                systemType: "web",
+                targets: ["frontend", "api", "database"]
+            };
+            
+            fetch(BASE_URL + '/scan-security', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                showResult(data);
+            })
+            .catch(error => {
+                hideLoading();
+                showResult({error: error.message});
+            });
+        }
+        
+        function refactorCode() {
+            showLoading();
+            
+            const payload = {
+                code: "public class ExampleService {\n    public void processData() {\n        // Complex method with duplicated logic\n    }\n}",
+                language: "java",
+                fileName: "ExampleService.java"
+            };
+            
+            fetch(BASE_URL + '/refactor-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                showResult(data);
+            })
+            .catch(error => {
+                hideLoading();
+                showResult({error: error.message});
+            });
+        }
+        
+        function scaleInfrastructure() {
+            showLoading();
+            
+            const payload = {
+                environment: "production",
+                currentMetrics: {
+                    cpuAverage: 80,
+                    memoryAverage: 72,
+                    storageUsage: 85
+                },
+                growthProjection: "2x"
+            };
+            
+            fetch(BASE_URL + '/scale-infrastructure', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                showResult(data);
+            })
+            .catch(error => {
+                hideLoading();
+                showResult({error: error.message});
+            });
+        }
+        
+        function integrateApi() {
+            showLoading();
+            
+            const payload = {
+                targetApi: "PaymentGatewayAPI",
+                integrationType: "oauth",
+                authDetails: {
+                    clientId: "client-123",
+                    clientSecret: "secret-456"
+                }
+            };
+            
+            fetch(BASE_URL + '/integrate-api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                showResult(data);
+            })
+            .catch(error => {
+                hideLoading();
+                showResult({error: error.message});
+            });
+        }
+        
+        function onboardClient() {
+            showLoading();
+            
+            // For client management, we use a different endpoint
+            const clientUrl = '/api/whiskey/clients/enterprise/onboard';
+            const payload = {
+                clientName: "TechCorp Solutions",
+                industry: "Technology",
+                companySize: "500-1000",
+                contactPerson: "John Smith",
+                email: "john.smith@techcorp.com",
+                subscriptionTier: "PREMIUM"
+            };
+            
+            fetch(clientUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                showResult(data);
+            })
+            .catch(error => {
+                hideLoading();
+                showResult({error: error.message});
+            });
+        }
+    </script>
+</body>
+</html>
