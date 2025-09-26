@@ -41,6 +41,11 @@ public class NexusCliApplication implements CommandLineRunner {
     registry.put("ingest", new com.boozer.nexus.cli.commands.IngestCommand());
         registry.put("catalog", new com.boozer.nexus.cli.commands.CatalogCommand());
         registry.put("run", new com.boozer.nexus.cli.commands.RunCommand());
+        // New advanced commands
+        registry.put("nl", new com.boozer.nexus.cli.commands.NaturalLanguageCommand());
+        registry.put("suggest", new com.boozer.nexus.cli.commands.SuggestCommand());
+        registry.put("refactor", new com.boozer.nexus.cli.commands.RefactorCommand());
+        registry.put("analytics", new com.boozer.nexus.cli.commands.AnalyticsCommand());
 
         if (args == null || args.length == 0) {
             printHelp(registry);
