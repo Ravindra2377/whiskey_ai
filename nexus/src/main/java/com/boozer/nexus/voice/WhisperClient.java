@@ -9,6 +9,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -29,13 +30,20 @@ public class WhisperClient {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final String apiKey;
+    private final PoolingHttpClientConnectionManager connectionManager;
 
     public WhisperClient(String apiKey) {
         this.apiKey = apiKey;
+        this.connectionManager = new PoolingHttpClientConnectionManager();
+        this.connectionManager.setDefaultMaxPerRoute(4);
+        this.connectionManager.setMaxTotal(8);
     }
 
     public String transcribe(Path audioFile) throws IOException {
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
+    try (CloseableHttpClient client = HttpClients.custom()
+        .setConnectionManager(connectionManager)
+        .setConnectionManagerShared(true)
+        .build()) {
             HttpPost post = new HttpPost(WHISPER_ENDPOINT);
             post.setHeader("Authorization", "Bearer " + apiKey);
 

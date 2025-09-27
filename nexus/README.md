@@ -53,6 +53,12 @@ Maven remains available as a fallback:
 nexus/mvnw -pl :nexus -am -DskipTests package
 ```
 
+
+Advanced options:
+
+- `--no-wake-word`: treat every transcript as a command (say `exit` to stop).
+- `--echo`: prints incremental transcript fragments as they stream in.
+- Auto-recovery will restart the microphone if the input stream drops during a session.
 On Windows use the corresponding `.cmd` wrappers.
 
 ## API Documentation
@@ -140,6 +146,7 @@ Key options:
 Notes and generation metadata are printed after each run for quick validation. Remember to review and harden AI-generated code before deploying to production systems.
 
 Tip: Natural language requests like `nl "Hey NEXUS, generate a Python service with tests"` now route directly into the `generate` command.
+Natural language also understands deployment and compliance requests, e.g. `nl "deploy to staging"` or `nl "show compliance analytics"`.
 
 ## License
 

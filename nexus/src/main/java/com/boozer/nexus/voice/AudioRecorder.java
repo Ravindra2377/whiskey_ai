@@ -43,6 +43,16 @@ public class AudioRecorder implements AutoCloseable {
         recording = true;
     }
 
+    public synchronized boolean restart() {
+        try {
+            stop();
+            start();
+            return true;
+        } catch (LineUnavailableException e) {
+            return false;
+        }
+    }
+
     public synchronized void stop() {
         recording = false;
         if (targetLine != null) {
@@ -70,6 +80,8 @@ public class AudioRecorder implements AutoCloseable {
             int read = targetLine.read(buffer, 0, buffer.length);
             if (read > 0) {
                 output.write(buffer, 0, read);
+            } else if (read < 0) {
+                break;
             }
         }
         return output.toByteArray();

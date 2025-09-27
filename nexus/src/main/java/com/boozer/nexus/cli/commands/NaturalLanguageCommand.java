@@ -45,6 +45,19 @@ public class NaturalLanguageCommand implements Command {
             System.out.println("[NL] -> run (dry-run) " + String.join(" ", flags));
             return new RunCommand().run(flags.toArray(new String[0]));
         }
+        if (query.contains("deploy")) {
+            List<String> flags = new ArrayList<>();
+            flags.add("--tag=deploy");
+            if (query.contains("staging")) flags.add("--name=staging");
+            if (query.contains("production") || query.contains("prod")) flags.add("--name=prod");
+            if (query.contains("confirm") || query.contains("execute")) flags.add("--confirm");
+            System.out.println("[NL] -> run " + String.join(" ", flags));
+            return new RunCommand().run(flags.toArray(new String[0]));
+        }
+        if (query.contains("compliance") || query.contains("security")) {
+            System.out.println("[NL] -> analytics");
+            return new AnalyticsCommand().run(new String[]{});
+        }
         if (query.contains("analytics")) {
             if (query.contains("voice")) {
                 System.out.println("[NL] -> analytics --voice");
