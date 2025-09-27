@@ -1,47 +1,205 @@
 package com.boozer.nexus.cli.commands;
 
+import com.boozer.nexus.persistence.VoiceCommandLogService;
+import com.boozer.nexus.voice.AudioRecorder;
+import com.boozer.nexus.voice.WhisperClient;
+
+import javax.sound.sampled.LineUnavailableException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.Locale;
+import java.util.Optional;
 
 public class VoiceCommand implements Command {
+    private static final Duration CHUNK_DURATION = Duration.ofSeconds(3);
+    private static final String DEFAULT_WAKE_WORD = "hey nexus";
+
+    private final VoiceCommandLogService historyService;
+
+    public VoiceCommand(VoiceCommandLogService historyService) {
+        this.historyService = historyService;
+    }
+
     @Override
     public String name() { return "voice"; }
 
     @Override
     public String description() {
-        return "Voice assistant (stub): transcribe an audio file and execute the parsed intent. Usage: voice --file=audio.wav [--echo]";
+        return "Voice assistant: use --file=audio.wav or --live for real-time capture (requires OpenAI Whisper key).";
     }
 
     @Override
-    public int run(String[] args) throws Exception {
+    public int run(String[] args) {
         String file = null;
         boolean echo = false;
+        boolean live = false;
+        String wakeWord = DEFAULT_WAKE_WORD;
+        String openAiKey = null;
+
         for (String a : args) {
             if (a.startsWith("--file=")) file = a.substring("--file=".length());
             if (a.equals("--echo")) echo = true;
+            if (a.equals("--live")) live = true;
+            if (a.startsWith("--wake-word=")) wakeWord = a.substring("--wake-word=".length()).trim();
+            if (a.startsWith("--openai-key=")) openAiKey = a.substring("--openai-key=".length()).trim();
         }
-        if (file == null) {
-            System.err.println("Usage: voice --file=audio.wav [--echo]");
-            return 2;
-        }
-        Path p = Paths.get(file);
-        if (!Files.exists(p)) {
-            System.err.println("Audio file not found: " + p.toAbsolutePath());
-            return 2;
-        }
-        // Stub transcription (replace with Whisper or Azure later)
-        String transcript = simulateTranscription(p);
-        if (echo) System.out.println("[voice:transcript] " + transcript);
 
-        // Reuse NL command to parse and execute
-        System.out.println("[voice] -> nl: " + transcript);
-        return new NaturalLanguageCommand().run(new String[]{ transcript });
+        if (live) {
+            return runLiveMode(openAiKey, wakeWord, echo);
+        }
+
+        if (file == null) {
+            System.err.println("Usage: voice --file=audio.wav [--echo] | voice --live [--wake-word=phrase] [--echo]");
+            return 2;
+        }
+
+        return runFileMode(file, echo, openAiKey)
+                .orElse(2);
+    }
+
+    private Optional<Integer> runFileMode(String file, boolean echo, String openAiKey) {
+        Path path = Paths.get(file);
+        if (!Files.exists(path)) {
+            System.err.println("Audio file not found: " + path.toAbsolutePath());
+            return Optional.of(2);
+        }
+
+        try {
+            String transcript;
+            if (openAiKey != null && !openAiKey.isBlank()) {
+                transcript = new WhisperClient(openAiKey).transcribe(path);
+            } else {
+                transcript = simulateTranscription(path);
+            }
+            if (transcript == null || transcript.isBlank()) {
+                System.err.println("No speech detected in file.");
+                logHistory(DEFAULT_WAKE_WORD, "", "", false, "empty transcript");
+                return Optional.of(3);
+            }
+
+            if (echo) {
+                System.out.println("[voice:transcript] " + transcript);
+            }
+
+            System.out.println("[voice] -> nl: " + transcript);
+            int code = executeCommand(transcript, transcript, DEFAULT_WAKE_WORD);
+            return Optional.of(code);
+        } catch (Exception ex) {
+            System.err.println("Failed to process audio file: " + ex.getMessage());
+            logHistory(DEFAULT_WAKE_WORD, "", "", false, ex.getMessage());
+            return Optional.of(1);
+        }
+    }
+
+    private int runLiveMode(String openAiKeyArg, String wakeWord, boolean echo) {
+        String resolvedWakeWord = wakeWord == null || wakeWord.isBlank() ? DEFAULT_WAKE_WORD : wakeWord.toLowerCase(Locale.ROOT);
+        String openAiKey = (openAiKeyArg == null || openAiKeyArg.isBlank())
+                ? System.getenv("NEXUS_OPENAI_KEY")
+                : openAiKeyArg;
+
+        if (openAiKey == null || openAiKey.isBlank()) {
+            System.err.println("OpenAI API key not provided. Use --openai-key=KEY or set NEXUS_OPENAI_KEY environment variable.");
+            return 2;
+        }
+        if (!AudioRecorder.isSupported()) {
+            System.err.println("Microphone capture is not supported on this system.");
+            return 3;
+        }
+
+        System.out.println("🎤 NEXUS voice mode active. Say '" + resolvedWakeWord + " ...' followed by a command. Say '" + resolvedWakeWord + " exit' to stop.");
+        WhisperClient whisperClient = new WhisperClient(openAiKey);
+
+        try (AudioRecorder recorder = new AudioRecorder()) {
+            recorder.start();
+            Runtime.getRuntime().addShutdownHook(new Thread(recorder::stop));
+
+            while (true) {
+                byte[] audio = recorder.capture(CHUNK_DURATION);
+                if (audio.length == 0) {
+                    continue;
+                }
+
+                String transcript;
+                try {
+                    transcript = whisperClient.transcribe(audio, recorder.getFormat());
+                } catch (Exception ex) {
+                    System.err.println("Whisper transcription failed: " + ex.getMessage());
+                    logHistory(resolvedWakeWord, "", "", false, ex.getMessage());
+                    continue;
+                }
+
+                if (transcript == null || transcript.isBlank()) {
+                    continue;
+                }
+
+                if (echo) {
+                    System.out.println("[voice:transcript] " + transcript);
+                }
+
+                String command = extractCommand(transcript, resolvedWakeWord);
+                if (command == null) {
+                    continue;
+                }
+
+                if (isExitCommand(command)) {
+                    System.out.println("👋 Exiting voice mode.");
+                    logHistory(resolvedWakeWord, transcript, command, true, null);
+                    return 0;
+                }
+
+                int code = executeCommand(command, transcript, resolvedWakeWord);
+                if (code == 0) {
+                    System.out.println("✔ Command completed: " + command);
+                } else {
+                    System.err.println("Command returned exit code " + code);
+                }
+            }
+        } catch (LineUnavailableException e) {
+            System.err.println("Unable to access system microphone: " + e.getMessage());
+            return 4;
+        }
+    }
+
+    private int executeCommand(String commandText, String transcript, String wakeWord) {
+        try {
+            int result = new NaturalLanguageCommand().run(new String[]{commandText});
+            logHistory(wakeWord, transcript, commandText, result == 0, null);
+            return result;
+        } catch (Exception ex) {
+            logHistory(wakeWord, transcript, commandText, false, ex.getMessage());
+            System.err.println("Command execution failed: " + ex.getMessage());
+            return 1;
+        }
+    }
+
+    private String extractCommand(String transcript, String wakeWord) {
+        String lower = transcript.toLowerCase(Locale.ROOT);
+        int idx = lower.indexOf(wakeWord.toLowerCase(Locale.ROOT));
+        if (idx < 0) {
+            return null;
+        }
+
+        String command = transcript.substring(idx + wakeWord.length()).trim();
+        if (command.isBlank()) {
+            return null;
+        }
+        return command;
+    }
+
+    private boolean isExitCommand(String command) {
+        String normalized = command.trim().toLowerCase(Locale.ROOT);
+        return normalized.equals("exit") || normalized.equals("quit") || normalized.equals("cancel voice");
+    }
+
+    private void logHistory(String wakeWord, String transcript, String commandText, boolean success, String error) {
+        if (historyService != null) {
+            historyService.record(wakeWord, transcript, commandText, success, error);
+        }
     }
 
     private String simulateTranscription(Path audio) {
-        // MVP: simple mapping by filename keywords
         String n = audio.getFileName().toString().toLowerCase(Locale.ROOT);
         if (n.contains("ingest")) return "ingest operations";
         if (n.contains("list") && n.contains("python")) return "list python scripts";

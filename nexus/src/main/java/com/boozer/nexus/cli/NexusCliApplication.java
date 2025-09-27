@@ -30,6 +30,9 @@ public class NexusCliApplication implements CommandLineRunner {
     @Autowired(required = false)
     private OperationCatalogPersistenceService persistenceService;
 
+    @Autowired(required = false)
+    private com.boozer.nexus.persistence.VoiceCommandLogService voiceCommandLogService;
+
     public static void main(String[] args) {
         new SpringApplicationBuilder(NexusCliApplication.class)
                 .web(WebApplicationType.NONE) // disable web server
@@ -51,7 +54,7 @@ public class NexusCliApplication implements CommandLineRunner {
         registry.put("suggest", new com.boozer.nexus.cli.commands.SuggestCommand());
         registry.put("refactor", new com.boozer.nexus.cli.commands.RefactorCommand());
         registry.put("analytics", new com.boozer.nexus.cli.commands.AnalyticsCommand());
-    registry.put("voice", new com.boozer.nexus.cli.commands.VoiceCommand());
+        registry.put("voice", new com.boozer.nexus.cli.commands.VoiceCommand(voiceCommandLogService));
 
         if (args == null || args.length == 0) {
             printHelp(registry);

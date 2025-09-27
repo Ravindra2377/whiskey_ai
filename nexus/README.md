@@ -37,19 +37,23 @@ The database configuration is in `src/main/resources/application.properties`.
 
 ## Building and Running
 
+The CLI is packaged with Gradle. From the repo root:
+
 ```bash
-# Build the project
-./mvnw clean package
+# Build the CLI jar
+gradle -p nexus bootJar
 
-# Run the application
-./mvnw spring-boot:run
+# Run the CLI (non-interactive)
+java -jar nexus/target/nexus-1.0.0.jar --help
 ```
 
-Or on Windows:
-```cmd
-mvnw.cmd clean package
-mvnw.cmd spring-boot:run
+Maven remains available as a fallback:
+
+```bash
+nexus/mvnw -pl :nexus -am -DskipTests package
 ```
+
+On Windows use the corresponding `.cmd` wrappers.
 
 ## API Documentation
 
@@ -78,6 +82,24 @@ Once running, NEXUS is accessible at:
 - API Base URL: http://localhost:8094/api/nexus
 - Health Check: http://localhost:8094/api/nexus/health
 - API Docs: http://localhost:8094/api/nexus/info
+
+## Voice Assistant
+
+NEXUS now supports a voice-driven interface backed by OpenAI Whisper.
+
+1. Export your OpenAI API key:
+	```bash
+	export NEXUS_OPENAI_KEY=sk-...
+	```
+	(On Windows PowerShell: `setx NEXUS_OPENAI_KEY "sk-..."` and restart the shell.)
+2. Connect a microphone and ensure your OS grants microphone permission to Java.
+3. Start the live assistant:
+	```bash
+	java -jar nexus/target/nexus-1.0.0.jar voice --live --echo
+	```
+4. Say "Hey NEXUS" followed by a command, e.g. "show system health". Say "Hey NEXUS exit" to quit.
+
+Voice interactions and their outcomes are automatically logged to PostgreSQL whenever the CLI is launched with database support enabled (`nexus.db.enabled=true`).
 
 ## License
 

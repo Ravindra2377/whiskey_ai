@@ -35,6 +35,8 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.core:jackson-annotations")
     implementation("com.fasterxml.jackson.core:jackson-core")
+    implementation("org.apache.httpcomponents:httpclient:4.5.14")
+    implementation("org.apache.httpcomponents:httpmime:4.5.14")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
@@ -47,6 +49,7 @@ tasks.named<JavaCompile>("compileJava") {
     options.encoding = "UTF-8"
     include("com/boozer/nexus/cli/**")
     include("com/boozer/nexus/persistence/**")
+    include("com/boozer/nexus/voice/**")
 }
 
 tasks.named<Jar>("jar") {
