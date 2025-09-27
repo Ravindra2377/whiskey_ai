@@ -4,6 +4,10 @@ Thumbs.db
 
 # Java / Maven
 target/
+.gradle/
+**/build/
+tools/
+gradle-*-bin.zip
 *.class
 *.log
 *.iml

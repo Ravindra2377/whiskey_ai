@@ -1,7 +1,25 @@
 package com.boozer.nexus.consciousness;
 
-import com.boozer.nexus.ai.models.AIResponse;
-import com.boozer.nexus.neuromorphic.models.NeuromorphicResult;
+// Removed unused AIResponse and NeuromorphicResult imports for now
+import com.boozer.nexus.consciousness.models.ConsciousnessConfig;
+import com.boozer.nexus.consciousness.models.ConsciousnessInput;
+import com.boozer.nexus.consciousness.models.ConsciousnessMetrics;
+import com.boozer.nexus.consciousness.models.ConsciousnessResult;
+import com.boozer.nexus.consciousness.models.ConsciousnessSession;
+import com.boozer.nexus.consciousness.models.ConsciousnessState;
+import com.boozer.nexus.consciousness.models.EmergentBehaviorAnalyzer;
+import com.boozer.nexus.consciousness.models.EmergentBehaviorResult;
+import com.boozer.nexus.consciousness.models.EpisodicMemorySystem;
+import com.boozer.nexus.consciousness.models.MetacognitionEvaluation;
+import com.boozer.nexus.consciousness.models.MetacognitionProcessor;
+import com.boozer.nexus.consciousness.models.MetacognitionResult;
+import com.boozer.nexus.consciousness.models.MetacognitionState;
+import com.boozer.nexus.consciousness.models.ReasoningInput;
+import com.boozer.nexus.consciousness.models.ReasoningResult;
+import com.boozer.nexus.consciousness.models.ReasoningStep;
+import com.boozer.nexus.consciousness.models.SelfAwarenessModule;
+import com.boozer.nexus.consciousness.models.SelfAwarenessResult;
+import com.boozer.nexus.consciousness.models.ConsciousnessIntegrationLayer;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +88,7 @@ public class ConsciousnessEngine {
             ConsciousnessSession session = activeSessions.get(sessionId);
             
             // Encode experience into episodic memory
-            EpisodicMemory memory = episodicMemory.encodeExperience(input, session);
+            Object memory = episodicMemory.encodeExperience(input, session);
             
             // Metacognitive reflection
             MetacognitionResult metacognitiveResult = metacognition.reflect(input, memory, session);
@@ -130,14 +148,14 @@ public class ConsciousnessEngine {
         result.setQuery(input.getQuery());
         
         // Retrieve relevant memories
-        List<EpisodicMemory> relevantMemories = episodicMemory.retrieveRelevantMemories(
+        java.util.List<Object> relevantMemories = episodicMemory.retrieveRelevantMemories(
             input.getQuery(), session, 10);
         
         // Metacognitive analysis of the reasoning process
-        MetacognitionState reasoningMeta = metacognition.analyzeReasoning(input, relevantMemories);
+    MetacognitionState reasoningMeta = metacognition.analyzeReasoning(input, relevantMemories);
         
         // Generate conscious reasoning chain
-        List<ReasoningStep> reasoningChain = generateReasoningChain(input, relevantMemories, reasoningMeta);
+    List<ReasoningStep> reasoningChain = generateReasoningChain(input, reasoningMeta);
         result.setReasoningChain(reasoningChain);
         
         // Self-monitoring of reasoning quality
@@ -157,6 +175,15 @@ public class ConsciousnessEngine {
         result.setSuccessful(true);
         
         return result;
+    }
+
+    // Simplified placeholder reasoning chain generator
+    private List<ReasoningStep> generateReasoningChain(ReasoningInput input, MetacognitionState state) {
+        List<ReasoningStep> steps = new ArrayList<>();
+        ReasoningStep step = new ReasoningStep();
+        step.setContent("Analyzed query: " + input.getQuery());
+        steps.add(step);
+        return steps;
     }
     
     /**
@@ -521,26 +548,6 @@ public class ConsciousnessEngine {
         double complexity = 0.5;
         double integration = result.getEmergenceStrength();
         return complexity * integration * Math.log(1 + integration);
-    }
-    
-    // Original helper methods
-                
-                // Apply self-improvements
-                Map<String, Object> improvements = applySelfImprovements(metaInsights);
-                
-                result.put("status", "SUCCESS");
-                result.put("analysis", analysis);
-                result.put("meta_insights", metaInsights);
-                result.put("improvements", improvements);
-                result.put("self_awareness_level", "REFLECTIVE");
-                result.put("message", "Self-reflective analysis completed");
-            } catch (Exception e) {
-                result.put("status", "ERROR");
-                result.put("message", "Self-reflective analysis failed: " + e.getMessage());
-            }
-            
-            return result;
-        }, taskExecutor);
     }
     
     /**

@@ -6,7 +6,7 @@ import java.util.*;
 /**
  * Core autonomous agent model
  */
-public class AutonomousAgent {
+class AutonomousAgent {
     private String agentId;
     private String agentType;
     private AgentStatus status;
@@ -71,7 +71,7 @@ public class AutonomousAgent {
 /**
  * Agent status enumeration
  */
-public enum AgentStatus {
+enum AgentStatus {
     CREATED,
     ACTIVE,
     INACTIVE,
@@ -83,7 +83,7 @@ public enum AgentStatus {
 /**
  * Agent configuration
  */
-public class AgentConfiguration {
+class AgentConfiguration {
     private String agentType;
     private List<String> capabilities;
     private List<AgentGoal> initialGoals;
@@ -127,7 +127,7 @@ public class AgentConfiguration {
 /**
  * Agent goal model
  */
-public class AgentGoal {
+class AgentGoal {
     private String goalId;
     private String goalType;
     private String description;
@@ -175,7 +175,7 @@ public class AgentGoal {
 /**
  * Goal status enumeration
  */
-public enum GoalStatus {
+enum GoalStatus {
     PENDING,
     ACTIVE,
     COMPLETED,
@@ -186,7 +186,7 @@ public enum GoalStatus {
 /**
  * Agent state model
  */
-public class AgentState {
+class AgentState {
     private LocalDateTime lastUpdate;
     private double environmentAwareness;
     private int activeTaskCount;
@@ -239,7 +239,7 @@ public class AgentState {
 /**
  * Environment perception model
  */
-public class EnvironmentPerception {
+class EnvironmentPerception {
     private String agentId;
     private LocalDateTime timestamp;
     private Map<String, Object> environmentData;
@@ -286,7 +286,7 @@ public class EnvironmentPerception {
 /**
  * Agent action model
  */
-public class AgentAction {
+class AgentAction {
     private String actionId;
     private String actionType;
     private String description;
@@ -338,7 +338,7 @@ public class AgentAction {
 /**
  * Action status enumeration
  */
-public enum ActionStatus {
+enum ActionStatus {
     PLANNED,
     IN_PROGRESS,
     COMPLETED,
@@ -349,7 +349,7 @@ public enum ActionStatus {
 /**
  * Action result model
  */
-public class ActionResult {
+class ActionResult {
     private boolean success;
     private String description;
     private Map<String, Object> resultData;
@@ -381,7 +381,7 @@ public class ActionResult {
 /**
  * Agent message model
  */
-public class AgentMessage {
+class AgentMessage {
     private String messageId;
     private String senderId;
     private String receiverId;
@@ -431,7 +431,7 @@ public class AgentMessage {
 /**
  * Task model
  */
-public class Task {
+class Task {
     private String taskId;
     private String taskType;
     private String description;
@@ -491,7 +491,7 @@ public class Task {
 /**
  * Task status enumeration
  */
-public enum TaskStatus {
+enum TaskStatus {
     CREATED,
     ASSIGNED,
     IN_PROGRESS,
@@ -503,7 +503,7 @@ public enum TaskStatus {
 /**
  * Collaboration session model
  */
-public class CollaborationSession {
+class CollaborationSession {
     private String sessionId;
     private String initiatorId;
     private List<String> participantIds;

@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * Manages experience replay for catastrophic forgetting prevention
  */
 @Component
-public class ExperienceReplayManager {
+class ExperienceReplayManager {
     
     private static final Logger logger = LoggerFactory.getLogger(ExperienceReplayManager.class);
     
@@ -73,7 +73,7 @@ public class ExperienceReplayManager {
  * Implements learning-to-learn capabilities
  */
 @Component
-public class MetaLearningEngine {
+class MetaLearningEngine {
     
     private static final Logger logger = LoggerFactory.getLogger(MetaLearningEngine.class);
     
@@ -185,7 +185,7 @@ public class MetaLearningEngine {
  * Performs knowledge distillation for model compression
  */
 @Component
-public class KnowledgeDistillationEngine {
+class KnowledgeDistillationEngine {
     
     private static final Logger logger = LoggerFactory.getLogger(KnowledgeDistillationEngine.class);
     
@@ -310,7 +310,7 @@ public class KnowledgeDistillationEngine {
  * Adapts learning architecture based on performance
  */
 @Component
-public class ArchitectureAdaptationEngine {
+class ArchitectureAdaptationEngine {
     
     private static final Logger logger = LoggerFactory.getLogger(ArchitectureAdaptationEngine.class);
     
@@ -448,7 +448,7 @@ public class ArchitectureAdaptationEngine {
  * Implements strategies to prevent catastrophic forgetting
  */
 @Component
-public class CatastrophicForgettingPrevention {
+class CatastrophicForgettingPrevention {
     
     private static final Logger logger = LoggerFactory.getLogger(CatastrophicForgettingPrevention.class);
     

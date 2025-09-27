@@ -1,6 +1,7 @@
 package com.boozer.nexus.cli.commands;
 
 import com.boozer.nexus.cli.model.OperationDescriptor;
+import com.boozer.nexus.persistence.OperationCatalogPersistenceService;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -9,6 +10,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class IngestCommand implements Command {
+    private final OperationCatalogPersistenceService persistenceService;
+
+    public IngestCommand() {
+        this(null);
+    }
+
+    public IngestCommand(OperationCatalogPersistenceService persistenceService) {
+        this.persistenceService = persistenceService;
+    }
+
     @Override
     public String name() { return "ingest"; }
 
@@ -46,6 +57,17 @@ public class IngestCommand implements Command {
         Files.writeString(output, json, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         System.out.println("Wrote catalog: " + output.toAbsolutePath());
         System.out.println("Total operations: " + ops.size());
+
+        if (persistenceService != null) {
+            try {
+                persistenceService.storeCatalog(root, ops);
+                System.out.println("Persisted catalog to database workspace: " + root);
+            } catch (Exception e) {
+                System.err.println("[WARN] Failed to persist catalog to database: " + e.getMessage());
+            }
+        } else {
+            System.out.println("(Database persistence disabled. Set nexus.db.enabled=true and datasource properties to store results in PostgreSQL.)");
+        }
         return 0;
     }
 

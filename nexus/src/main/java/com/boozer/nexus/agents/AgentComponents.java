@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Handles message passing and communication protocols between agents
  */
 @Component
-public class AgentCommunicationManager {
+class AgentCommunicationManager {
     
     private static final Logger logger = LoggerFactory.getLogger(AgentCommunicationManager.class);
     
@@ -91,7 +91,7 @@ public class AgentCommunicationManager {
  * Manages task assignment and collaboration between agents
  */
 @Component
-public class TaskDelegationEngine {
+class TaskDelegationEngine {
     
     private static final Logger logger = LoggerFactory.getLogger(TaskDelegationEngine.class);
     
@@ -162,7 +162,7 @@ public class TaskDelegationEngine {
  * Manages agent memory, experiences, and knowledge
  */
 @Component
-public class AgentMemoryManager {
+class AgentMemoryManager {
     
     private static final Logger logger = LoggerFactory.getLogger(AgentMemoryManager.class);
     
@@ -298,7 +298,7 @@ public class AgentMemoryManager {
  * Plans actions based on agent goals and current state
  */
 @Component
-public class GoalPlanningEngine {
+class GoalPlanningEngine {
     
     private static final Logger logger = LoggerFactory.getLogger(GoalPlanningEngine.class);
     

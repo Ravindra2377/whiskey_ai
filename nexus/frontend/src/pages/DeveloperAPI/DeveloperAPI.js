@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Code, Book, Terminal, Zap } from 'lucide-react';
+import { Code } from 'lucide-react';
 
 const DeveloperAPI = () => {
   return (

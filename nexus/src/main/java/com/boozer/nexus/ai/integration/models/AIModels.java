@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AIRequest {
+class AIRequest {
     private String id;
     private AIRequestType type;
     private String content;
@@ -35,7 +35,7 @@ public class AIRequest {
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AIResponse {
+class AIResponse {
     private String requestId;
     private String provider;
     private boolean successful;
@@ -50,7 +50,7 @@ public class AIResponse {
     private List<String> warnings;
 }
 
-public enum AIRequestType {
+enum AIRequestType {
     TEXT_GENERATION("text_generation", "General text generation"),
     CODE_GENERATION("code_generation", "Code generation and completion"),
     CODE_REVIEW("code_review", "Code review and analysis"),
@@ -86,7 +86,7 @@ public enum AIRequestType {
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProviderMetrics {
+class ProviderMetrics {
     private String providerName;
     private long totalRequests;
     private long successfulRequests;
@@ -132,7 +132,7 @@ public class ProviderMetrics {
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProviderTypeMetrics {
+class ProviderTypeMetrics {
     private AIRequestType requestType;
     private long requests;
     private double averageResponseTime;
@@ -144,7 +144,7 @@ public class ProviderTypeMetrics {
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProviderStatus {
+class ProviderStatus {
     private String name;
     private boolean healthy;
     private double successRate;
@@ -159,7 +159,7 @@ public class ProviderStatus {
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProviderHealthStatus {
+class ProviderHealthStatus {
     private Map<String, ProviderStatus> providers;
     private boolean overallHealthy;
     private LocalDateTime timestamp;
@@ -170,7 +170,7 @@ public class ProviderHealthStatus {
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProviderUsageStats {
+class ProviderUsageStats {
     private String provider;
     private long totalRequests;
     private long successfulRequests;
@@ -186,7 +186,7 @@ public class ProviderUsageStats {
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AIUsageStatistics {
+class AIUsageStatistics {
     private LocalDateTime since;
     private LocalDateTime generatedAt;
     private Map<String, ProviderUsageStats> providerStats;
@@ -201,7 +201,7 @@ public class AIUsageStatistics {
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProviderCapabilities {
+class ProviderCapabilities {
     private String providerName;
     private List<AIRequestType> supportedTypes;
     private Map<String, String> supportedModels;
@@ -218,7 +218,7 @@ public class ProviderCapabilities {
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RouterDecision {
+class RouterDecision {
     private String selectedProvider;
     private String reason;
     private double confidence;
@@ -231,7 +231,7 @@ public class RouterDecision {
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class QualityAssessment {
+class QualityAssessment {
     private double relevanceScore;
     private double accuracyScore;
     private double completenessScore;
@@ -249,7 +249,7 @@ public class QualityAssessment {
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProviderSelectionCriteria {
+class ProviderSelectionCriteria {
     private double costWeight;
     private double speedWeight;
     private double qualityWeight;

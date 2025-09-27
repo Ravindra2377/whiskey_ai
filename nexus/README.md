@@ -28,7 +28,7 @@ NEXUS uses PostgreSQL for persistent storage of tasks and their lifecycle inform
 2. Create the database and user:
 
 ```sql
-CREATE USER boozer_user WITH PASSWORD 'boozer_password';
+CREATE USER boozer_user WITH PASSWORD 'pASSWORD@11';
 CREATE DATABASE boozer_db OWNER boozer_user;
 GRANT ALL PRIVILEGES ON DATABASE boozer_db TO boozer_user;
 ```

@@ -3,14 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from 'react-hot-toast';
 import Navigation from './components/Navigation/Navigation';
-import Dashboard from './pages/Dashboard/Dashboard';
-import QuantumConsciousness from './pages/QuantumConsciousness/QuantumConsciousness';
-import NeuromorphicProcessing from './pages/NeuromorphicProcessing/NeuromorphicProcessing';
-import AIOrchestration from './pages/AIOrchestration/AIOrchestration';
-import RevolutionaryFeatures from './pages/RevolutionaryFeatures/RevolutionaryFeatures';
-import Authentication from './pages/Authentication/Authentication';
-import DeveloperAPI from './pages/DeveloperAPI/DeveloperAPI';
-import EnterprisePortal from './pages/EnterprisePortal/EnterprisePortal';
+import Prompt from './pages/Prompt/Prompt';
 import SystemStatus from './pages/SystemStatus/SystemStatus';
 import './index.css';
 
@@ -47,15 +40,8 @@ function App() {
             
             <main className="min-h-screen">
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/quantum-consciousness" element={<QuantumConsciousness />} />
-                <Route path="/neuromorphic-processing" element={<NeuromorphicProcessing />} />
-                <Route path="/ai-orchestration" element={<AIOrchestration />} />
-                <Route path="/revolutionary-features" element={<RevolutionaryFeatures />} />
-                <Route path="/authentication" element={<Authentication />} />
-                <Route path="/developer-api" element={<DeveloperAPI />} />
-                <Route path="/enterprise-portal" element={<EnterprisePortal />} />
+                <Route path="/" element={<Prompt />} />
+                <Route path="/prompt" element={<Prompt />} />
                 <Route path="/system-status" element={<SystemStatus />} />
               </Routes>
             </main>

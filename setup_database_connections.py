@@ -21,7 +21,7 @@ class DatabaseConnectionManager:
                 'port': int(os.getenv('DB_PORT', '5432')),
                 'database': os.getenv('DB_NAME', 'nexus_ai'),
                 'user': os.getenv('DB_USER', 'nexus_admin'),
-                'password': os.getenv('DB_PASSWORD', 'SecurePassword123!')
+                'password': os.getenv('DB_PASSWORD', 'pASSWORD@11')
             },
             'redis': {
                 'host': os.getenv('REDIS_HOST', 'localhost'),

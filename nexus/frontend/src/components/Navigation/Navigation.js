@@ -1,21 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Brain,
-  Cpu,
-  Zap,
-  Stars,
-  Shield,
-  Code,
-  Building,
-  Activity,
-  Menu,
-  X,
-  Atom,
-  Network,
-  Sparkles
-} from 'lucide-react';
+import { Zap, Shield, Activity, Menu, X, Atom, Sparkles } from 'lucide-react';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,46 +9,10 @@ const Navigation = () => {
 
   const navigationItems = [
     {
-      name: 'Dashboard',
-      path: '/dashboard',
+      name: 'Prompt',
+      path: '/prompt',
       icon: Activity,
-      description: 'System Overview'
-    },
-    {
-      name: 'Quantum Consciousness',
-      path: '/quantum-consciousness',
-      icon: Brain,
-      description: 'Consciousness Simulation'
-    },
-    {
-      name: 'Neuromorphic Processing',
-      path: '/neuromorphic-processing',
-      icon: Cpu,
-      description: 'Brain-Inspired Computing'
-    },
-    {
-      name: 'AI Orchestration',
-      path: '/ai-orchestration',
-      icon: Network,
-      description: 'Multi-Provider Integration'
-    },
-    {
-      name: 'Revolutionary Features',
-      path: '/revolutionary-features',
-      icon: Stars,
-      description: '20+ Advanced Capabilities'
-    },
-    {
-      name: 'Developer API',
-      path: '/developer-api',
-      icon: Code,
-      description: 'Integration & Testing'
-    },
-    {
-      name: 'Enterprise Portal',
-      path: '/enterprise-portal',
-      icon: Building,
-      description: 'Enterprise Management'
+      description: 'Ask NEXUS AI'
     },
     {
       name: 'System Status',
@@ -73,7 +23,7 @@ const Navigation = () => {
   ];
 
   const isActiveRoute = (path) => {
-    return location.pathname === path || (path === '/dashboard' && location.pathname === '/');
+    return location.pathname === path || (path === '/prompt' && location.pathname === '/');
   };
 
   return (
@@ -83,15 +33,13 @@ const Navigation = () => {
         <div className="flex flex-col w-full">
           {/* Logo Section */}
           <div className="p-6 border-b border-quantum-border">
-            <Link to="/dashboard" className="flex items-center space-x-3 group">
+            <Link to="/prompt" className="flex items-center space-x-3 group">
               <div className="relative">
                 <Atom className="w-8 h-8 text-quantum-primary quantum-pulse" />
                 <Sparkles className="w-4 h-4 text-quantum-accent absolute -top-1 -right-1 animate-pulse" />
               </div>
               <div>
-                <h1 className="text-xl font-bold quantum-gradient bg-clip-text text-transparent">
-                  NEXUS AI
-                </h1>
+                <h1 className="text-xl font-extrabold text-quantum-text-primary drop-shadow-[0_1px_6px_rgba(120,119,198,0.5)]">NEXUS AI</h1>
                 <p className="text-xs text-quantum-text-muted">Quantum Platform</p>
               </div>
             </Link>
@@ -157,9 +105,9 @@ const Navigation = () => {
         {/* Mobile Header */}
         <header className="fixed top-0 left-0 right-0 h-16 bg-quantum-bg-secondary/90 backdrop-blur-xl border-b border-quantum-border z-50">
           <div className="flex items-center justify-between h-full px-4">
-            <Link to="/dashboard" className="flex items-center space-x-2">
+            <Link to="/prompt" className="flex items-center space-x-2">
               <Atom className="w-6 h-6 text-quantum-primary" />
-              <span className="text-lg font-bold text-quantum-text-primary">NEXUS AI</span>
+              <span className="text-lg font-extrabold text-quantum-text-primary">NEXUS AI</span>
             </Link>
             
             <button

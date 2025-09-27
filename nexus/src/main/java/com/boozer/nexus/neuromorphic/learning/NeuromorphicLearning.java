@@ -14,7 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Implements various forms of synaptic plasticity including Hebbian learning,
  * spike-timing dependent plasticity (STDP), and homeostatic mechanisms.
  */
-public class SynapticPlasticityEngine {
+class SynapticPlasticityEngine {
     
     private static final Logger logger = LoggerFactory.getLogger(SynapticPlasticityEngine.class);
     

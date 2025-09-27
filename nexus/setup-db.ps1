@@ -47,7 +47,7 @@ try {
 
     # Create user
     Write-Host "Creating user 'boozer_user'..." -ForegroundColor Yellow
-    $result = & $psqlPath -U postgres -c "CREATE USER boozer_user WITH PASSWORD 'boozer_password';" 2>&1
+    $result = & $psqlPath -U postgres -c "CREATE USER boozer_user WITH PASSWORD 'pASSWORD@11';" 2>&1
     if ($LASTEXITCODE -eq 0) {
         Write-Host "User 'boozer_user' created successfully" -ForegroundColor Green
     } else {

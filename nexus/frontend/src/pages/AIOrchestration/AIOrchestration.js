@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Network, Layers, Zap, GitBranch, Users, Activity } from 'lucide-react';
+import { Network, Zap, Users, Activity } from 'lucide-react';
 
 const AIOrchestration = () => {
   const providers = [

@@ -38,7 +38,7 @@ if ($LASTEXITCODE -eq 0) {
 }
 
 # Create the boozer_user
-& $psqlPath -U postgres -c "CREATE USER boozer_user WITH PASSWORD 'boozer_password';" 2>$null
+& $psqlPath -U postgres -c "CREATE USER boozer_user WITH PASSWORD 'pASSWORD@11';" 2>$null
 if ($LASTEXITCODE -eq 0) {
     Write-Host "✓ User 'boozer_user' created successfully" -ForegroundColor Green
 } else {

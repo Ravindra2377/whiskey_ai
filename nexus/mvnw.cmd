@@ -117,30 +117,47 @@ for /F "usebackq delims=" %%a in ("%MAVEN_PROJECTBASEDIR%\.mvn\jvm.config") do s
 :endReadAdditionalConfig
 
 SET MAVEN_JAVA_EXE="%JAVA_HOME%\bin\java.exe"
-set WRAPPER_JAR="%MAVEN_PROJECTBASEDIR%\.mvn\wrapper\maven-wrapper.jar"
+rem Do NOT include quotes in the variable value; quote only at usage time
+set WRAPPER_JAR=%MAVEN_PROJECTBASEDIR%\.mvn\wrapper\maven-wrapper.jar
 if exist "%WRAPPER_JAR%" (
     if "%MVNW_VERBOSE%" == "true" (
         echo Found %WRAPPER_JAR%
     )
 ) else (
-    if not "%MVNW_REPOURL%" == "" (
-        SET DOWNLOAD_URL="%MVNW_REPOURL%/org/apache/maven/wrapper/maven-wrapper/3.1.0/maven-wrapper-3.1.0.jar"
+  if not "%MVNW_REPOURL%" == "" (
+    SET DOWNLOAD_URL="%MVNW_REPOURL%/org/apache/maven/wrapper/maven-wrapper/3.1.0/maven-wrapper-3.1.0.jar"
+  )
+  rem If no custom repo URL was provided, read wrapperUrl from properties using delayed expansion
+  @setlocal EnableExtensions EnableDelayedExpansion
+  if "!DOWNLOAD_URL!"=="" (
+    set "WRAPPER_PROPERTIES=%MAVEN_PROJECTBASEDIR%\.mvn\wrapper\maven-wrapper.properties"
+    if exist "!WRAPPER_PROPERTIES!" (
+      for /F "usebackq tokens=1,* delims==" %%A in ("!WRAPPER_PROPERTIES!") do (
+        if /I "%%A"=="wrapperUrl" set "DOWNLOAD_URL=%%B"
+      )
     )
-    if "%MVNW_VERBOSE%" == "true" (
-        echo Couldn't find %WRAPPER_JAR%, downloading it ...
-        echo Downloading from: %DOWNLOAD_URL%
+  )
+  if "%MVNW_VERBOSE%" == "true" (
+    echo Couldn't find %WRAPPER_JAR%, downloading it ...
+    echo Downloading from: !DOWNLOAD_URL!
     )
 
-    powershell -Command "&{"^
+  if "!DOWNLOAD_URL!"=="" (
+    rem Fallback to default official Maven Central wrapper jar URL (3.1.0)
+    set DOWNLOAD_URL=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.1.0/maven-wrapper-3.1.0.jar
+  )
+
+  powershell -Command "&{"^
 		"$webclient = new-object System.Net.WebClient;"^
 		"if (-not ([string]::IsNullOrEmpty('%MVNW_USERNAME%') -and [string]::IsNullOrEmpty('%MVNW_PASSWORD%'))) {"^
 		"$webclient.Credentials = new-object System.Net.NetworkCredential('%MVNW_USERNAME%', '%MVNW_PASSWORD%');"^
 		"}"^
-		"[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $webclient.DownloadFile('%DOWNLOAD_URL%', '%WRAPPER_JAR%')"^
+		"[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $webclient.DownloadFile('!DOWNLOAD_URL!', '%WRAPPER_JAR%')"^
 		"}"
     if "%MVNW_VERBOSE%" == "true" (
         echo Finished downloading %WRAPPER_JAR%
     )
+  @endlocal
 )
 @REM End of extension
 
@@ -152,7 +169,7 @@ set MAVEN_CMD_LINE_ARGS=%*
   %JVM_CONFIG_MAVEN_PROPS% ^
   %MAVEN_OPTS% ^
   %MAVEN_DEBUG_OPTS% ^
-  -classpath %WRAPPER_JAR% ^
+    -classpath "%WRAPPER_JAR%" ^
   "-Dmaven.multiModuleProjectDirectory=%MAVEN_PROJECTBASEDIR%" ^
   org.apache.maven.wrapper.MavenWrapperMain %MAVEN_CONFIG% %*
 if ERRORLEVEL 1 goto error

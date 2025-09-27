@@ -8,8 +8,8 @@ try:
     connection = psycopg2.connect(
         host="localhost",
         database="postgres",  # Connect to default database first
-        user="postgres",
-        password="postgres",  # Default password, change if needed
+    user="postgres",
+    password="pASSWORD@11",  # Updated superuser password
         port="5432"
     )
     
@@ -30,7 +30,7 @@ except Exception as e:
 try:
     # Create user
     print("Creating user 'boozer_user'...")
-    cursor.execute("CREATE USER boozer_user WITH PASSWORD 'boozer_password';")
+    cursor.execute("CREATE USER boozer_user WITH PASSWORD 'pASSWORD@11';")
     print("✓ User 'boozer_user' created successfully")
     
 except Exception as e:

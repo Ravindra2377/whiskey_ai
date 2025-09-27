@@ -67,6 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // Public endpoints
                 .antMatchers("/api/v1/auth/**").permitAll()
                 .antMatchers("/api/v1/health").permitAll()
+                .antMatchers("/api/v1/demo/**").permitAll()
                 .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
                 .antMatchers("/actuator/health", "/actuator/info").permitAll()
                 
@@ -110,7 +111,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
+        // Allow API and actuator endpoints during development
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }

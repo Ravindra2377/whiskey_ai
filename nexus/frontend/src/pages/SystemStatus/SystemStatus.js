@@ -1,8 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Activity, Shield, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useSystemStatus } from '../../hooks/useSystemStatus';
 
 const SystemStatus = () => {
+  const { data: status, isLoading } = useSystemStatus();
+
   return (
     <div className="lg:ml-64 min-h-screen bg-quantum-bg-primary">
       <div className="pt-16 lg:pt-0">
@@ -23,10 +26,10 @@ const SystemStatus = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: CheckCircle, label: 'System Health', value: 'Excellent', color: 'text-green-400' },
-              { icon: Activity, label: 'Uptime', value: '99.9%', color: 'text-quantum-primary' },
-              { icon: Shield, label: 'Security', value: 'Secure', color: 'text-quantum-accent' },
-              { icon: AlertTriangle, label: 'Alerts', value: '0', color: 'text-yellow-400' }
+              { icon: CheckCircle, label: 'System Health', value: isLoading ? '…' : status.health, color: 'text-green-400' },
+              { icon: Activity, label: 'Uptime', value: isLoading ? '…' : status.uptime, color: 'text-quantum-primary' },
+              { icon: Shield, label: 'Security', value: isLoading ? '…' : status.security, color: 'text-quantum-accent' },
+              { icon: AlertTriangle, label: 'Alerts', value: isLoading ? '…' : String(status.alerts), color: 'text-yellow-400' }
             ].map((metric, index) => {
               const Icon = metric.icon;
               return (
@@ -55,10 +58,10 @@ const SystemStatus = () => {
           >
             <Activity className="w-16 h-16 text-green-400 mx-auto mb-4 quantum-pulse" />
             <h3 className="text-xl font-semibold text-quantum-text-primary mb-2">
-              All Systems Operational
+              {isLoading ? 'Loading Status…' : 'All Systems Operational'}
             </h3>
             <p className="text-quantum-text-secondary">
-              Advanced monitoring dashboard coming soon...
+              {isLoading ? 'Fetching live metrics.' : 'Advanced monitoring dashboard coming soon...'}
             </p>
           </motion.div>
         </div>

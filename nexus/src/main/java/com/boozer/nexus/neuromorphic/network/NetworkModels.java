@@ -15,7 +15,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Network topology definition
  */
-public class NetworkTopology {
+class NetworkTopology {
     private String topologyType;
     private int neuronCount;
     private double connectivity;
@@ -50,7 +50,7 @@ public class NetworkTopology {
 /**
  * Neuron configuration
  */
-public class NeuronConfig {
+class NeuronConfig {
     private String neuronType;
     private double restingPotential;
     private double threshold;
@@ -85,7 +85,7 @@ public class NeuronConfig {
 /**
  * Network information
  */
-public class NetworkInfo {
+class NetworkInfo {
     private String networkId;
     private int neuronCount;
     private int synapseCount;
@@ -116,7 +116,7 @@ public class NetworkInfo {
 /**
  * Spiking Neural Network implementation
  */
-public class SpikingNeuralNetwork {
+class SpikingNeuralNetwork {
     private static final Logger logger = LoggerFactory.getLogger(SpikingNeuralNetwork.class);
     
     private final String networkId;

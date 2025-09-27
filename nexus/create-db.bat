@@ -13,7 +13,7 @@ if %errorlevel% equ 0 (
 )
 
 REM Create user
-%PGPATH%\psql.exe -U postgres -c "CREATE USER boozer_user WITH PASSWORD 'boozer_password';" 2>nul
+%PGPATH%\psql.exe -U postgres -c "CREATE USER boozer_user WITH PASSWORD 'pASSWORD@11';" 2>nul
 if %errorlevel% equ 0 (
     echo User 'boozer_user' created successfully
 ) else (

@@ -216,7 +216,7 @@ if (-not $pgInstalled) {
     Write-Host "After installation, you'll also need to create the database:" -ForegroundColor Yellow
     Write-Host "1. Open pgAdmin or psql" -ForegroundColor Yellow
     Write-Host "2. Run these commands:" -ForegroundColor Yellow
-    Write-Host "   CREATE USER boozer_user WITH PASSWORD 'boozer_password';" -ForegroundColor Yellow
+    Write-Host "   CREATE USER boozer_user WITH PASSWORD 'pASSWORD@11';" -ForegroundColor Yellow
     Write-Host "   CREATE DATABASE boozer_db OWNER boozer_user;" -ForegroundColor Yellow
     Write-Host "   GRANT ALL PRIVILEGES ON DATABASE boozer_db TO boozer_user;" -ForegroundColor Yellow
     Write-Host ""

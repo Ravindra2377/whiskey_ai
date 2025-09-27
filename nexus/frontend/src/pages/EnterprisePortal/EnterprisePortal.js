@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Building, Users, BarChart3, Settings } from 'lucide-react';
+import { Building } from 'lucide-react';
 
 const EnterprisePortal = () => {
   return (

@@ -7,7 +7,7 @@ try:
         host="localhost",
         database="boozer_db",
         user="boozer_user",
-        password="boozer_password",
+    password="pASSWORD@11",
         port="5432"
     )
     

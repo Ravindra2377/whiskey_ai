@@ -1,5 +1,7 @@
 package com.boozer.nexus.cli;
 
+import com.boozer.nexus.persistence.OperationCatalogPersistenceService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
@@ -25,6 +27,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
         }
 )
 public class NexusCliApplication implements CommandLineRunner {
+    @Autowired(required = false)
+    private OperationCatalogPersistenceService persistenceService;
+
     public static void main(String[] args) {
         new SpringApplicationBuilder(NexusCliApplication.class)
                 .web(WebApplicationType.NONE) // disable web server
@@ -38,7 +43,7 @@ public class NexusCliApplication implements CommandLineRunner {
         var registry = new java.util.LinkedHashMap<String, com.boozer.nexus.cli.commands.Command>();
         registry.put("health", new com.boozer.nexus.cli.commands.HealthCommand());
         registry.put("version", new com.boozer.nexus.cli.commands.VersionCommand("NEXUS AI CLI v1.0.0"));
-    registry.put("ingest", new com.boozer.nexus.cli.commands.IngestCommand());
+        registry.put("ingest", new com.boozer.nexus.cli.commands.IngestCommand(persistenceService));
         registry.put("catalog", new com.boozer.nexus.cli.commands.CatalogCommand());
         registry.put("run", new com.boozer.nexus.cli.commands.RunCommand());
         // New advanced commands
@@ -46,6 +51,7 @@ public class NexusCliApplication implements CommandLineRunner {
         registry.put("suggest", new com.boozer.nexus.cli.commands.SuggestCommand());
         registry.put("refactor", new com.boozer.nexus.cli.commands.RefactorCommand());
         registry.put("analytics", new com.boozer.nexus.cli.commands.AnalyticsCommand());
+    registry.put("voice", new com.boozer.nexus.cli.commands.VoiceCommand());
 
         if (args == null || args.length == 0) {
             printHelp(registry);

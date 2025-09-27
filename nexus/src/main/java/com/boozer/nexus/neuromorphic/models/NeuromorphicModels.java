@@ -4,55 +4,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Neuromorphic Result Models
- * 
- * Data structures for neuromorphic processing results and brain simulation.
+/*
+ * NOTE: Original NeuromorphicResult definition removed to avoid duplicate with the new public
+ * NeuromorphicResult class (in its own file). Remaining internal supporting model classes are kept.
  */
-
-/**
- * Main result class for neuromorphic processing
- */
-public class NeuromorphicResult {
-    private String networkId;
-    private List<SpikeEvent> inputSpikes;
-    private List<SpikeEvent> outputSpikes;
-    private TemporalPattern temporalPattern;
-    private long processingTime;
-    private NetworkState networkState;
-    private boolean successful;
-    private LocalDateTime timestamp;
-    
-    // Getters and Setters
-    public String getNetworkId() { return networkId; }
-    public void setNetworkId(String networkId) { this.networkId = networkId; }
-    
-    public List<SpikeEvent> getInputSpikes() { return inputSpikes; }
-    public void setInputSpikes(List<SpikeEvent> inputSpikes) { this.inputSpikes = inputSpikes; }
-    
-    public List<SpikeEvent> getOutputSpikes() { return outputSpikes; }
-    public void setOutputSpikes(List<SpikeEvent> outputSpikes) { this.outputSpikes = outputSpikes; }
-    
-    public TemporalPattern getTemporalPattern() { return temporalPattern; }
-    public void setTemporalPattern(TemporalPattern temporalPattern) { this.temporalPattern = temporalPattern; }
-    
-    public long getProcessingTime() { return processingTime; }
-    public void setProcessingTime(long processingTime) { this.processingTime = processingTime; }
-    
-    public NetworkState getNetworkState() { return networkState; }
-    public void setNetworkState(NetworkState networkState) { this.networkState = networkState; }
-    
-    public boolean isSuccessful() { return successful; }
-    public void setSuccessful(boolean successful) { this.successful = successful; }
-    
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
-}
 
 /**
  * Spike event representation
  */
-public class SpikeEvent {
+class SpikeEvent {
     private int neuronId;
     private long timestamp;
     private double amplitude;
@@ -83,7 +43,7 @@ public class SpikeEvent {
 /**
  * Temporal pattern analysis
  */
-public class TemporalPattern {
+class TemporalPattern {
     private String patternType;
     private double frequency;
     private double amplitude;
@@ -118,7 +78,7 @@ public class TemporalPattern {
 /**
  * Network state representation
  */
-public class NetworkState {
+class NetworkState {
     private int activeNeurons;
     private double averageFiringRate;
     private double networkSynchrony;
@@ -149,7 +109,7 @@ public class NetworkState {
 /**
  * Neuromorphic configuration
  */
-public class NeuromorphicConfig {
+class NeuromorphicConfig {
     private boolean learningEnabled;
     private boolean adaptiveEnabled;
     private double timeStep;
@@ -188,7 +148,7 @@ public class NeuromorphicConfig {
 /**
  * Learning result
  */
-public class LearningResult {
+class LearningResult {
     private String networkId;
     private int sequencesLearned;
     private int successfulSequences;
@@ -223,7 +183,7 @@ public class LearningResult {
 /**
  * Learning configuration
  */
-public class LearningConfig {
+class LearningConfig {
     private boolean adaptiveEnabled;
     private double learningRate;
     private int maxEpochs;
@@ -258,7 +218,7 @@ public class LearningConfig {
 /**
  * Temporal sequence for learning
  */
-public class TemporalSequence {
+class TemporalSequence {
     private String sequenceId;
     private List<Double> values;
     private long startTime;
@@ -289,7 +249,7 @@ public class TemporalSequence {
 /**
  * Brain simulation result
  */
-public class BrainSimulationResult {
+class BrainSimulationResult {
     private String networkId;
     private List<SimulationStep> simulationSteps;
     private List<OscillationPattern> oscillations;
@@ -328,7 +288,7 @@ public class BrainSimulationResult {
 /**
  * Brain simulation configuration
  */
-public class BrainSimulationConfig {
+class BrainSimulationConfig {
     private long simulationDuration;
     private double timeStep;
     private boolean oscillationsEnabled;
@@ -367,7 +327,7 @@ public class BrainSimulationConfig {
 /**
  * Simulation step
  */
-public class SimulationStep {
+class SimulationStep {
     private long timestamp;
     private NetworkState networkState;
     private List<SpikeEvent> spikes;
@@ -394,7 +354,7 @@ public class SimulationStep {
 /**
  * Oscillation pattern
  */
-public class OscillationPattern {
+class OscillationPattern {
     private String type;
     private double minFrequency;
     private double maxFrequency;
@@ -430,7 +390,7 @@ public class OscillationPattern {
 /**
  * Plasticity change
  */
-public class PlasticityChange {
+class PlasticityChange {
     private String type;
     private String mechanism;
     private double strength;
@@ -457,7 +417,7 @@ public class PlasticityChange {
 /**
  * Emergent behavior
  */
-public class EmergentBehavior {
+class EmergentBehavior {
     private String type;
     private String property;
     private double strength;
@@ -480,7 +440,7 @@ public class EmergentBehavior {
 /**
  * Brain metrics
  */
-public class BrainMetrics {
+class BrainMetrics {
     private double complexity;
     private double connectivity;
     private double plasticity;

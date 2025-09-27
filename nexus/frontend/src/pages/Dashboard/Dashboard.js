@@ -4,41 +4,21 @@ import {
   Brain,
   Cpu,
   Network,
-  Zap,
   Activity,
-  TrendingUp,
   Users,
   Server,
-  Shield,
   Clock,
   Star,
   Sparkles,
-  Atom,
   Target,
-  BarChart3,
-  GitBranch
+  BarChart3
 } from 'lucide-react';
 
 // Import chart components
-import {
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const Dashboard = () => {
-  const [systemMetrics, setSystemMetrics] = useState({
+  const [systemMetrics] = useState({
     quantumEfficiency: 95.7,
     consciousnessAccuracy: 99.2,
     neuromorphicPower: 98.5,
@@ -49,7 +29,7 @@ const Dashboard = () => {
   });
 
   const [realtimeData, setRealtimeData] = useState([]);
-  const [performanceData, setPerformanceData] = useState([]);
+  // const [performanceData, setPerformanceData] = useState([]);
 
   // Simulate real-time data updates
   useEffect(() => {
@@ -72,31 +52,14 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Performance data for charts
-  useEffect(() => {
-    const generatePerformanceData = () => {
-      const data = [];
-      for (let i = 0; i < 24; i++) {
-        data.push({
-          hour: `${i}:00`,
-          requests: Math.floor(Math.random() * 1000) + 500,
-          responses: Math.floor(Math.random() * 950) + 480,
-          errors: Math.floor(Math.random() * 20) + 1,
-          latency: Math.floor(Math.random() * 100) + 50
-        });
-      }
-      setPerformanceData(data);
-    };
-
-    generatePerformanceData();
-  }, []);
+  // (Optional) Performance data generator removed; using realtimeData for live chart
 
   const systemComponents = [
     {
       name: 'Quantum Intelligence',
       status: 'Active',
       efficiency: systemMetrics.quantumEfficiency,
-      icon: Atom,
+  icon: Brain,
       color: 'text-quantum-primary',
       bgColor: 'bg-quantum-primary/10',
       description: 'Quantum-inspired optimization running'

@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * Multimodal input containing multiple data modalities
  */
-public class MultimodalInput {
+class MultimodalInput {
     private String inputId;
     private String userId;
     private List<ModalityData> modalities;
@@ -51,7 +51,7 @@ public class MultimodalInput {
 /**
  * Individual modality data
  */
-public class ModalityData {
+class ModalityData {
     private String modalityType; // "image", "audio", "video", "text"
     private Object data;
     private String encoding;
@@ -83,7 +83,7 @@ public class ModalityData {
 /**
  * Multimodal processing context
  */
-public class MultimodalContext {
+class MultimodalContext {
     private String userId;
     private String sessionId;
     private String taskType;
@@ -125,7 +125,7 @@ public class MultimodalContext {
 /**
  * Multimodal processing result
  */
-public class MultimodalResult {
+class MultimodalResult {
     private String inputId;
     private String response;
     private Map<String, ModalityResult> modalityResults;
@@ -182,7 +182,7 @@ public class MultimodalResult {
 /**
  * Individual modality processing result
  */
-public class ModalityResult {
+class ModalityResult {
     private String modalityType;
     private String analysis;
     private Map<String, Object> features;
@@ -227,7 +227,7 @@ public class ModalityResult {
 /**
  * Cross-modal analysis result
  */
-public class CrossModalAnalysis {
+class CrossModalAnalysis {
     private String inputId;
     private Map<String, String> insights;
     private String unifiedUnderstanding;
@@ -269,7 +269,7 @@ public class CrossModalAnalysis {
 /**
  * Modality correlation measurement
  */
-public class ModalityCorrelation {
+class ModalityCorrelation {
     private String modality1;
     private String modality2;
     private double correlationScore;
@@ -304,7 +304,7 @@ public class ModalityCorrelation {
 /**
  * Unified multimodal embedding
  */
-public class UnifiedEmbedding {
+class UnifiedEmbedding {
     private String embeddingId;
     private double[] unifiedVector;
     private Map<String, double[]> modalityEmbeddings;
@@ -349,7 +349,7 @@ public class UnifiedEmbedding {
 /**
  * Image analysis specific models
  */
-public class ImageAnalysis {
+class ImageAnalysis {
     private List<DetectedObject> objects;
     private List<String> dominantColors;
     private String sceneType;
@@ -387,7 +387,7 @@ public class ImageAnalysis {
 /**
  * Detected object in image
  */
-public class DetectedObject {
+class DetectedObject {
     private String objectClass;
     private double confidence;
     private BoundingBox boundingBox;
@@ -414,7 +414,7 @@ public class DetectedObject {
 /**
  * Bounding box for object detection
  */
-public class BoundingBox {
+class BoundingBox {
     private int x;
     private int y;
     private int width;
@@ -446,7 +446,7 @@ public class BoundingBox {
 /**
  * Audio analysis specific models
  */
-public class AudioAnalysis {
+class AudioAnalysis {
     private String transcription;
     private List<String> detectedEmotions;
     private double noiseLevel;
@@ -483,7 +483,7 @@ public class AudioAnalysis {
 /**
  * Audio properties
  */
-public class AudioProperties {
+class AudioProperties {
     private double duration;
     private int sampleRate;
     private int channels;
@@ -510,7 +510,7 @@ public class AudioProperties {
 /**
  * Audio segment
  */
-public class AudioSegment {
+class AudioSegment {
     private double startTime;
     private double endTime;
     private String segmentType; // "speech", "music", "silence", "noise"
@@ -537,7 +537,7 @@ public class AudioSegment {
 /**
  * Video analysis specific models
  */
-public class VideoAnalysis {
+class VideoAnalysis {
     private double duration;
     private double frameRate;
     private String resolution;
@@ -578,7 +578,7 @@ public class VideoAnalysis {
 /**
  * Video scene
  */
-public class VideoScene {
+class VideoScene {
     private double startTime;
     private double endTime;
     private String sceneType;

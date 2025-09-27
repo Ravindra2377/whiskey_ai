@@ -4,21 +4,18 @@ import {
   Brain,
   Zap,
   Eye,
-  Layers,
-  Activity,
   Sparkles,
   Atom,
   Waves,
   Timer,
-  Target,
-  BarChart3,
   Play,
   Pause,
-  RotateCcw,
   Settings,
-  TrendingUp,
+  Cpu,
+  Layers,
   GitBranch,
-  Cpu
+  Activity,
+  TrendingUp
 } from 'lucide-react';
 
 const QuantumConsciousness = () => {
@@ -96,8 +93,9 @@ const QuantumConsciousness = () => {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const width = canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-    const height = canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+  // Size canvas for device pixel ratio
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+  canvas.height = canvas.offsetHeight * window.devicePixelRatio;
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
     let animationId;

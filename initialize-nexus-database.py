@@ -16,14 +16,14 @@ def create_database_and_user():
             host="localhost",
             database="postgres",  # Connect to default database
             user="postgres",
-            password="postgres"   # Default password, change if needed
+            password="pASSWORD@11"   # Updated password
         )
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cursor = conn.cursor()
         
         # Create user
         try:
-            cursor.execute("CREATE USER boozer_user WITH PASSWORD 'boozer_password';")
+            cursor.execute("CREATE USER boozer_user WITH PASSWORD 'pASSWORD@11';")
             print("Created user 'boozer_user'")
         except psycopg2.Error as e:
             if "already exists" in str(e):
@@ -74,7 +74,7 @@ def test_nexus_connection():
             host="localhost",
             database="boozer_db",
             user="boozer_user",
-            password="boozer_password",
+            password="pASSWORD@11",
             port="5432"
         )
         

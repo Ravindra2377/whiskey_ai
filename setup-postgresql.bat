@@ -25,7 +25,7 @@ echo -- Connect to PostgreSQL
 echo psql -U postgres -h localhost
 echo.
 echo -- Create database user
-echo CREATE USER boozer_user WITH PASSWORD 'boozer_password';
+echo CREATE USER boozer_user WITH PASSWORD 'pASSWORD@11';
 echo.
 echo -- Create development database  
 echo CREATE DATABASE boozer_dev OWNER boozer_user;
@@ -43,7 +43,7 @@ echo ----------------------------------------
 echo You can set these environment variables:
 echo set DATABASE_URL=jdbc:postgresql://localhost:5432/boozer_dev
 echo set DB_USERNAME=boozer_user  
-echo set DB_PASSWORD=boozer_password
+echo set DB_PASSWORD=pASSWORD@11
 echo.
 
 echo Step 4: Alternative - Using Default Postgres User

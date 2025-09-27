@@ -10,7 +10,7 @@ import java.util.*;
 /**
  * Agent memory container
  */
-public class AgentMemory {
+class AgentMemory {
     private String agentId;
     private LocalDateTime creationTime;
     private LocalDateTime lastUpdate;
@@ -72,7 +72,7 @@ public class AgentMemory {
 /**
  * Agent experience record
  */
-public class AgentExperience {
+class AgentExperience {
     private String experienceId;
     private String agentId;
     private LocalDateTime timestamp;
@@ -123,7 +123,7 @@ public class AgentExperience {
 /**
  * Learning experience record
  */
-public class LearningExperience {
+class LearningExperience {
     private String learningId;
     private String agentId;
     private LocalDateTime timestamp;
@@ -172,7 +172,7 @@ public class LearningExperience {
 /**
  * Knowledge item in agent's knowledge base
  */
-public class KnowledgeItem {
+class KnowledgeItem {
     private String knowledgeId;
     private String content;
     private String source;
@@ -227,7 +227,7 @@ public class KnowledgeItem {
 /**
  * Action memory record
  */
-public class ActionMemory {
+class ActionMemory {
     private String memoryId;
     private AgentAction action;
     private LocalDateTime timestamp;

@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Emergence configuration
  */
-public class EmergenceConfig {
+class EmergenceConfig {
     private String emergenceType;
     private Map<String, Object> parameters;
     private double intensityLevel;
@@ -48,7 +48,7 @@ public class EmergenceConfig {
 /**
  * Emergence result
  */
-public class EmergenceResult {
+class EmergenceResult {
     private String emergenceType;
     private Object emergenceData;
     private double emergenceStrength;
@@ -83,7 +83,7 @@ public class EmergenceResult {
 /**
  * Emergence pattern
  */
-public class EmergencePattern {
+class EmergencePattern {
     private String patternType;
     private double complexity;
     private double coherence;
@@ -110,7 +110,7 @@ public class EmergencePattern {
 /**
  * Self-awareness emergence
  */
-public class SelfAwarenessEmergence {
+class SelfAwarenessEmergence {
     private double selfRecognition;
     private double bodyAwareness;
     private double mentalStateAwareness;
@@ -133,7 +133,7 @@ public class SelfAwarenessEmergence {
 /**
  * Metacognition emergence
  */
-public class MetacognitionEmergence {
+class MetacognitionEmergence {
     private double knowledgeOfCognition;
     private double regulationOfCognition;
     private double metacognitiveExperiences;
@@ -156,7 +156,7 @@ public class MetacognitionEmergence {
 /**
  * Integration emergence
  */
-public class IntegrationEmergence {
+class IntegrationEmergence {
     private double informationIntegration;
     private double globalAccessibility;
     private double unifiedExperience;
@@ -179,7 +179,7 @@ public class IntegrationEmergence {
 /**
  * Global workspace emergence
  */
-public class GlobalWorkspaceEmergence {
+class GlobalWorkspaceEmergence {
     private double globalBroadcasting;
     private double competitiveSelection;
     private double workspaceIntegration;

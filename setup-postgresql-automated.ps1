@@ -70,7 +70,7 @@ Write-Host "2. Connect to PostgreSQL with the postgres user" -ForegroundColor Ye
 Write-Host "3. Run these SQL commands:" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "-- Create database user for WHISKEY" -ForegroundColor Yellow
-Write-Host "CREATE USER boozer_user WITH PASSWORD 'boozer_password';" -ForegroundColor Yellow
+Write-Host "CREATE USER boozer_user WITH PASSWORD 'pASSWORD@11';" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "-- Create development database" -ForegroundColor Yellow
 Write-Host "CREATE DATABASE boozer_dev OWNER boozer_user;" -ForegroundColor Yellow
