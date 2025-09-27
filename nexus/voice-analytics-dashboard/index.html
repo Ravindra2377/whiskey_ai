@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus Voice Analytics Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <h1>NEXUS Voice Analytics</h1>
+      <p class="subtitle">Live snapshot from <code>analytics --voice --server</code></p>
+      <div class="controls">
+        <label>API Base URL
+          <input id="api-url" type="text" value="http://localhost:8088" />
+        </label>
+        <button id="refresh">Refresh</button>
+      </div>
+      <p class="status" id="status">Waiting for data…</p>
+    </header>
+
+    <section class="metrics" id="metrics">
+      <!-- Populated dynamically -->
+    </section>
+
+    <section class="tables" id="tables">
+      <!-- Command/error/intents tables inserted here -->
+    </section>
+  </main>
+
+  <template id="table-template">
+    <article>
+      <h2></h2>
+      <table>
+        <thead>
+        <tr><th>Key</th><th>Count</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </article>
+  </template>
+
+  <script type="module">
+    const metricsContainer = document.getElementById('metrics');
+    const tablesContainer = document.getElementById('tables');
+    const statusEl = document.getElementById('status');
+    const refreshBtn = document.getElementById('refresh');
+    const apiInput = document.getElementById('api-url');
+    const template = document.getElementById('table-template');
+
+    async function fetchMetrics() {
+      const base = apiInput.value.replace(/\/$/, '');
+      const url = `${base}/metrics`;
+      try {
+        statusEl.textContent = 'Fetching metrics…';
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const payload = await response.json();
+        renderMetrics(payload);
+        statusEl.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = `Failed to load metrics: ${err.message}`;
+      }
+    }
+
+    function renderMetrics(data) {
+      metricsContainer.innerHTML = '';
+      tablesContainer.innerHTML = '';
+
+      const headline = document.createElement('div');
+      headline.className = 'headline';
+      headline.innerHTML = `
+        <div><span>Total</span><strong>${data.total}</strong></div>
+        <div><span>Success</span><strong>${data.successful}</strong></div>
+        <div><span>Success rate</span><strong>${percent(data.successRate)}</strong></div>
+        <div><span>Awaiting confirmation</span><strong>${data.awaitingConfirmation}</strong></div>
+        <div><span>Wake word misses</span><strong>${data.wakeWordMisses}</strong></div>
+        <div><span>No speech</span><strong>${data.noSpeechEvents}</strong></div>
+        <div><span>Follow-ups resumed</span><strong>${data.resumedCommands}</strong></div>
+        <div><span>Repeated commands</span><strong>${data.repeatedCommands}</strong></div>
+      `;
+      metricsContainer.appendChild(headline);
+
+      addTable('Top Commands', data.commandCounts || {});
+      addTable('Top Intents', data.intentCounts || {});
+      addTable('Top Errors', data.errorCounts || {});
+    }
+
+    function addTable(title, map) {
+      const entries = Object.entries(map);
+      if (entries.length === 0) {
+        return;
+      }
+      const clone = template.content.cloneNode(true);
+      clone.querySelector('h2').textContent = title;
+      const tbody = clone.querySelector('tbody');
+      entries.forEach(([key, value]) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${escapeHtml(key)}</td><td>${value}</td>`;
+        tbody.appendChild(row);
+      });
+      tablesContainer.appendChild(clone);
+    }
+
+    function percent(value) {
+      if (!value || Number.isNaN(value)) {
+        return '0%';
+      }
+      return `${(value * 100).toFixed(1)}%`;
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+    }
+
+    refreshBtn.addEventListener('click', fetchMetrics);
+    setInterval(fetchMetrics, 5000);
+    fetchMetrics();
+  </script>
+</body>
+</html>

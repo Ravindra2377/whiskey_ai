@@ -2,6 +2,7 @@ package com.boozer.nexus.cli.commands;
 
 import com.boozer.nexus.persistence.VoiceCommandLogService;
 import com.boozer.nexus.voice.AudioRecorder;
+import com.boozer.nexus.voice.VoiceErrorHints;
 import com.boozer.nexus.voice.WhisperClient;
 
 import javax.sound.sampled.LineUnavailableException;
@@ -11,15 +12,20 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 public class VoiceCommand implements Command {
     private static final Duration CHUNK_DURATION = Duration.ofSeconds(1);
     private static final String DEFAULT_WAKE_WORD = "hey nexus";
+    private static final int WAKE_WORD_HINT_THRESHOLD = 2;
+    private static final int BLANK_TRANSCRIPT_THRESHOLD = 3;
 
     private final VoiceCommandLogService historyService;
+    private final NaturalLanguageCommand naturalLanguage;
 
-    public VoiceCommand(VoiceCommandLogService historyService) {
+    public VoiceCommand(VoiceCommandLogService historyService, NaturalLanguageCommand naturalLanguage) {
         this.historyService = historyService;
+        this.naturalLanguage = naturalLanguage;
     }
 
     @Override
@@ -27,16 +33,16 @@ public class VoiceCommand implements Command {
 
     @Override
     public String description() {
-    return "Voice assistant: use --file=audio.wav or --live for real-time capture (requires OpenAI Whisper key)." +
-        " Include --check-config to validate microphone and API setup or --no-wake-word for continuous capture.";
+        return "Voice assistant: use --file=audio.wav or --live for real-time capture (requires OpenAI Whisper key)." +
+                " Include --check-config to validate microphone, analytics, and AI setup or --no-wake-word for continuous capture.";
     }
 
     @Override
     public int run(String[] args) {
         String file = null;
         boolean echo = false;
-    boolean live = false;
-    boolean noWakeWord = false;
+        boolean live = false;
+        boolean noWakeWord = false;
         boolean check = false;
         String wakeWord = DEFAULT_WAKE_WORD;
         String openAiKey = null;
@@ -66,7 +72,7 @@ public class VoiceCommand implements Command {
             return 2;
         }
 
-    return runFileMode(file, echo, resolvedKey)
+        return runFileMode(file, echo, resolvedKey)
                 .orElse(2);
     }
 
@@ -105,6 +111,10 @@ public class VoiceCommand implements Command {
             System.out.println("ℹ️  Database logging disabled (VoiceCommandLogService not available). Enable nexus.db.enabled=true to store history.");
         }
 
+        if (naturalLanguage != null) {
+            System.out.println("✅ Conversational AI pipeline active with resumable actions and analytics integration.");
+        }
+
         System.out.println("Run `voice --live --echo` to start, add --no-wake-word for continuous capture, or pass --openai-key=KEY to override.");
         return ok ? 0 : 1;
     }
@@ -125,7 +135,7 @@ public class VoiceCommand implements Command {
             }
             if (transcript == null || transcript.isBlank()) {
                 System.err.println("No speech detected in file.");
-                logHistory(DEFAULT_WAKE_WORD, "", "", false, "empty transcript");
+                logHistory(DEFAULT_WAKE_WORD, "", "", null, false, "empty transcript");
                 return Optional.of(3);
             }
 
@@ -138,7 +148,7 @@ public class VoiceCommand implements Command {
             return Optional.of(code);
         } catch (Exception ex) {
             System.err.println("Failed to process audio file: " + ex.getMessage());
-            logHistory(DEFAULT_WAKE_WORD, "", "", false, ex.getMessage());
+            logHistory(DEFAULT_WAKE_WORD, "", "", null, false, ex.getMessage());
             return Optional.of(1);
         }
     }
@@ -146,6 +156,8 @@ public class VoiceCommand implements Command {
     private int runLiveMode(String openAiKey, String wakeWord, boolean echo, boolean noWakeWord) {
         String resolvedWakeWord = wakeWord == null || wakeWord.isBlank() ? DEFAULT_WAKE_WORD : wakeWord.toLowerCase(Locale.ROOT);
         TranscriptTracker tracker = new TranscriptTracker();
+        int wakeWordMisses = 0;
+        int blankTranscriptEvents = 0;
 
         if (openAiKey == null || openAiKey.isBlank()) {
             System.err.println("OpenAI API key not provided. Use --openai-key=KEY or set NEXUS_OPENAI_KEY / OPENAI_API_KEY environment variables.");
@@ -191,27 +203,42 @@ public class VoiceCommand implements Command {
                     transcript = whisperClient.transcribe(audio, recorder.getFormat());
                 } catch (Exception ex) {
                     System.err.println("Whisper transcription failed: " + ex.getMessage());
-                    logHistory(resolvedWakeWord, "", "", false, ex.getMessage());
+                    logHistory(resolvedWakeWord, "", "", null, false, ex.getMessage());
                     continue;
                 }
 
                 if (transcript == null || transcript.isBlank()) {
+                    blankTranscriptEvents++;
+                    if (blankTranscriptEvents % BLANK_TRANSCRIPT_THRESHOLD == 0) {
+                        System.out.println("⚠️  I'm hearing silence or background noise. Move closer to the mic or re-run `voice --check-config`.");
+                        logHistory(resolvedWakeWord, "", "", "no-speech", false, "blank transcript chunk");
+                    }
                     continue;
                 }
+                blankTranscriptEvents = 0;
 
                 String delta = tracker.delta(transcript);
                 if (echo && !delta.isBlank()) {
                     System.out.println("[voice:transcript] " + delta);
                 }
 
+                boolean wakeWordHeard = !noWakeWord && transcript.toLowerCase(Locale.ROOT).contains(resolvedWakeWord);
                 String command = noWakeWord ? transcript.trim() : extractCommand(transcript, resolvedWakeWord);
                 if (command == null) {
+                    if (wakeWordHeard) {
+                        wakeWordMisses++;
+                        if (wakeWordMisses % WAKE_WORD_HINT_THRESHOLD == 0) {
+                            System.out.println("⚠️  I heard '" + resolvedWakeWord + "' but not the command. Pause briefly after the wake word or choose a shorter phrase.");
+                            logHistory(resolvedWakeWord, transcript, "", "wake-word-miss", false, "wake word detected without command");
+                        }
+                    }
                     continue;
                 }
+                wakeWordMisses = 0;
 
                 if (isExitCommand(command)) {
                     System.out.println("👋 Exiting voice mode.");
-                    logHistory(resolvedWakeWord, transcript, command, true, null);
+                    logHistory(resolvedWakeWord, transcript, command, "exit", true, null);
                     return 0;
                 }
 
@@ -230,12 +257,33 @@ public class VoiceCommand implements Command {
 
     private int executeCommand(String commandText, String transcript, String wakeWord) {
         try {
-            int result = new NaturalLanguageCommand().run(new String[]{commandText});
-            logHistory(wakeWord, transcript, commandText, result == 0, null);
-            return result;
+            if (naturalLanguage == null) {
+                System.err.println("Natural language processor unavailable. Enable nl command to execute voice requests.");
+                logHistory(wakeWord, transcript, commandText, null, false, "nl processor unavailable");
+                return 1;
+            }
+
+            NaturalLanguageCommand.NaturalLanguageResult nlResult = naturalLanguage.process(commandText, true);
+            nlResult.getMessages().forEach(message -> System.out.println("[voice:nl] " + message));
+            if (nlResult.isAwaitingConfirmation()) {
+                System.out.println("Awaiting your confirmation. Say 'yes' to continue or 'no' to cancel.");
+            }
+
+            boolean success = nlResult.isExecuted() && nlResult.getExitCode() == 0;
+            String error = null;
+            if (nlResult.isAwaitingConfirmation()) {
+                error = "awaiting confirmation";
+            } else if (!success && nlResult.getExitCode() != 0) {
+                error = summarize(nlResult.getMessages());
+            }
+
+            logHistory(wakeWord, transcript, commandText, nlResult.getIntentLabel(), success, error);
+            VoiceErrorHints.lookup(error).ifPresent(hint -> System.out.println("[voice:hint] " + hint));
+            return nlResult.getExitCode();
         } catch (Exception ex) {
-            logHistory(wakeWord, transcript, commandText, false, ex.getMessage());
+            logHistory(wakeWord, transcript, commandText, null, false, ex.getMessage());
             System.err.println("Command execution failed: " + ex.getMessage());
+            VoiceErrorHints.lookup(ex.getMessage()).ifPresent(hint -> System.out.println("[voice:hint] " + hint));
             return 1;
         }
     }
@@ -259,9 +307,9 @@ public class VoiceCommand implements Command {
         return normalized.equals("exit") || normalized.equals("quit") || normalized.equals("cancel voice");
     }
 
-    private void logHistory(String wakeWord, String transcript, String commandText, boolean success, String error) {
+    private void logHistory(String wakeWord, String transcript, String commandText, String intentLabel, boolean success, String error) {
         if (historyService != null) {
-            historyService.record(wakeWord, transcript, commandText, success, error);
+            historyService.record(wakeWord, transcript, commandText, intentLabel, success, error);
         }
     }
 
@@ -271,6 +319,15 @@ public class VoiceCommand implements Command {
         if (n.contains("list") && n.contains("python")) return "list python scripts";
         if (n.contains("run") && n.contains("infra")) return "run infra tasks";
         return "catalog summary";
+    }
+
+    private String summarize(java.util.List<String> messages) {
+        if (messages == null || messages.isEmpty()) {
+            return null;
+        }
+        StringJoiner joiner = new StringJoiner(" | ");
+        messages.forEach(joiner::add);
+        return joiner.toString();
     }
 
     private static class TranscriptTracker {

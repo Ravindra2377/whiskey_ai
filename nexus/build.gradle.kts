@@ -33,6 +33,7 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.3")
     implementation("com.zaxxer:HikariCP")
     implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("com.fasterxml.jackson.core:jackson-annotations")
     implementation("com.fasterxml.jackson.core:jackson-core")
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
@@ -48,6 +49,8 @@ tasks.withType<Test> {
 tasks.named<JavaCompile>("compileJava") {
     options.encoding = "UTF-8"
     include("com/boozer/nexus/cli/**")
+    include("com/boozer/nexus/nl/**")
+    include("com/boozer/nexus/cli/server/**")
     include("com/boozer/nexus/persistence/**")
     include("com/boozer/nexus/voice/**")
     include("com/boozer/nexus/codegen/**")

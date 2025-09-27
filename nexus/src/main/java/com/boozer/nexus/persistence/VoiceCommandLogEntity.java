@@ -20,6 +20,9 @@ public class VoiceCommandLogEntity {
     @Column(name = "command_text", columnDefinition = "TEXT")
     private String commandText;
 
+    @Column(name = "intent_label", length = 100)
+    private String intentLabel;
+
     @Column(name = "successful")
     private boolean successful;
 
@@ -32,10 +35,11 @@ public class VoiceCommandLogEntity {
     protected VoiceCommandLogEntity() {
     }
 
-    public VoiceCommandLogEntity(String wakeWord, String transcript, String commandText, boolean successful, String errorMessage) {
+    public VoiceCommandLogEntity(String wakeWord, String transcript, String commandText, String intentLabel, boolean successful, String errorMessage) {
         this.wakeWord = wakeWord;
         this.transcript = transcript;
         this.commandText = commandText;
+        this.intentLabel = (intentLabel == null || intentLabel.isBlank()) ? "unknown" : intentLabel;
         this.successful = successful;
         this.errorMessage = errorMessage;
     }
@@ -54,6 +58,10 @@ public class VoiceCommandLogEntity {
 
     public String getCommandText() {
         return commandText;
+    }
+
+    public String getIntentLabel() {
+        return intentLabel;
     }
 
     public boolean isSuccessful() {

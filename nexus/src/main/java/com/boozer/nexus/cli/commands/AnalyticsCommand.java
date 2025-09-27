@@ -4,6 +4,8 @@ import com.boozer.nexus.cli.model.OperationDescriptor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.boozer.nexus.cli.server.VoiceAnalyticsHttpServer;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,13 +33,36 @@ public class AnalyticsCommand implements Command {
 
     @Override
     public int run(String[] args) throws Exception {
-        boolean voice = Arrays.stream(args).anyMatch(a -> a.equals("--voice"));
+        boolean voice = false;
+        boolean server = false;
+        Integer serverPort = null;
+
+        for (String arg : args) {
+            if ("--voice".equals(arg)) {
+                voice = true;
+            }
+            if (arg.startsWith("--server")) {
+                server = true;
+                int eq = arg.indexOf('=');
+                if (eq > 0) {
+                    try {
+                        serverPort = Integer.parseInt(arg.substring(eq + 1));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+        }
+
+        if (server) {
+            voice = true; // implicit
+        }
+
         if (voice) {
             if (voiceAnalyticsService == null) {
                 System.err.println("Voice analytics requires database support. Enable nexus.db.enabled=true and rerun.");
                 return 2;
             }
-            return renderVoiceAnalytics();
+            return renderVoiceAnalytics(server, serverPort);
         }
 
         Path catalogPath = resolveCatalog(args);
@@ -78,28 +103,61 @@ public class AnalyticsCommand implements Command {
         return 0;
     }
 
-    private int renderVoiceAnalytics() {
+    private int renderVoiceAnalytics(boolean startServer, Integer serverPort) {
         var summary = voiceAnalyticsService.summarize();
+        boolean hasData = summary.getTotal() > 0;
         System.out.println("Voice Command Analytics");
-        if (summary.getTotal() == 0) {
+        if (!hasData) {
             System.out.println("No voice commands logged yet. Run voice --live with database enabled.");
+        } else {
+            System.out.println("Total commands: " + summary.getTotal());
+            System.out.println("Successful: " + summary.getSuccessful());
+            long failed = summary.getTotal() - summary.getSuccessful();
+            System.out.println("Failed: " + failed);
+            System.out.printf("Success rate: %.1f%%%n", summary.getSuccessRate() * 100.0);
+            if (summary.getAwaitingConfirmation() > 0) {
+                System.out.println("Awaiting confirmation events: " + summary.getAwaitingConfirmation());
+            }
+            if (summary.getResumedCommands() > 0 || summary.getRepeatedCommands() > 0) {
+                System.out.println("Follow-ups: resumed=" + summary.getResumedCommands() + ", repeated=" + summary.getRepeatedCommands());
+            }
+            if (summary.getWakeWordMisses() > 0 || summary.getNoSpeechEvents() > 0) {
+                System.out.println("Signal quality: wake word misses=" + summary.getWakeWordMisses() + ", no-speech=" + summary.getNoSpeechEvents());
+            }
+            if (summary.getFirst() != null && summary.getLast() != null) {
+                System.out.println("Range: " + summary.getFirst() + " -> " + summary.getLast());
+            }
+
+            System.out.println("\nTop Commands:");
+            summary.getCommandCounts().forEach((cmd, count) -> System.out.printf("  %-25s %d%n", cmd, count));
+
+            if (!summary.getIntentCounts().isEmpty()) {
+                System.out.println("\nTop Intents:");
+                summary.getIntentCounts().forEach((intent, count) ->
+                        System.out.printf("  %-25s %d%n", intent, count));
+            }
+
+            if (!summary.getErrorCounts().isEmpty()) {
+                System.out.println("\nTop Errors:");
+                summary.getErrorCounts().forEach((err, count) -> System.out.printf("  %-40s %d%n", err, count));
+            }
+        }
+
+        if (startServer) {
+            int port = serverPort != null ? serverPort : 8088;
+            try (VoiceAnalyticsHttpServer server = new VoiceAnalyticsHttpServer(voiceAnalyticsService)) {
+                server.start(port);
+                System.out.println("\nVoice analytics API available at http://localhost:" + port + "/");
+                System.out.println("Endpoints: / (html), /metrics (json), /health");
+                System.out.println("Press Ctrl+C to stop.");
+                server.blockUntilShutdown();
+            } catch (Exception ex) {
+                System.err.println("Failed to start analytics server: " + ex.getMessage());
+                return 1;
+            }
             return 0;
         }
-        System.out.println("Total commands: " + summary.getTotal());
-        System.out.println("Successful: " + summary.getSuccessful());
-        long failed = summary.getTotal() - summary.getSuccessful();
-        System.out.println("Failed: " + failed);
-        if (summary.getFirst() != null && summary.getLast() != null) {
-            System.out.println("Range: " + summary.getFirst() + " -> " + summary.getLast());
-        }
 
-        System.out.println("\nTop Commands:");
-        summary.getCommandCounts().forEach((cmd, count) -> System.out.printf("  %-25s %d%n", cmd, count));
-
-        if (!summary.getErrorCounts().isEmpty()) {
-            System.out.println("\nTop Errors:");
-            summary.getErrorCounts().forEach((err, count) -> System.out.printf("  %-40s %d%n", err, count));
-        }
         return 0;
     }
 

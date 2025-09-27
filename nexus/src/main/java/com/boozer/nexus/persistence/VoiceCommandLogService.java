@@ -14,7 +14,7 @@ public class VoiceCommandLogService {
     }
 
     @Transactional
-    public void record(String wakeWord, String transcript, String commandText, boolean successful, String errorMessage) {
-        repository.save(new VoiceCommandLogEntity(wakeWord, transcript, commandText, successful, errorMessage));
+    public void record(String wakeWord, String transcript, String commandText, String intentLabel, boolean successful, String errorMessage) {
+        repository.save(new VoiceCommandLogEntity(wakeWord, transcript, commandText, intentLabel, successful, errorMessage));
     }
 }

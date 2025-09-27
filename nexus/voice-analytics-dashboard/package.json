@@ -1,0 +1,11 @@
+{
+  "name": "voice-analytics-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "lite-server"
+  },
+  "devDependencies": {
+    "lite-server": "^2.7.2"
+  }
+}
