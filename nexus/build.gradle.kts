@@ -50,6 +50,7 @@ tasks.named<JavaCompile>("compileJava") {
     include("com/boozer/nexus/cli/**")
     include("com/boozer/nexus/persistence/**")
     include("com/boozer/nexus/voice/**")
+    include("com/boozer/nexus/codegen/**")
 }
 
 tasks.named<Jar>("jar") {

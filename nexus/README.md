@@ -101,6 +101,34 @@ NEXUS now supports a voice-driven interface backed by OpenAI Whisper.
 
 Voice interactions and their outcomes are automatically logged to PostgreSQL whenever the CLI is launched with database support enabled (`nexus.db.enabled=true`).
 
+To review voice usage analytics once logging is enabled:
+
+```bash
+java -jar nexus/target/nexus-1.0.0.jar analytics --voice
+```
+
+## AI Code Generation
+
+The `generate` command turns natural language specifications into production-ready code via OpenAI's GPT models.
+
+1. Ensure `NEXUS_OPENAI_KEY` is set (the same key used for voice features).
+2. Describe the desired implementation:
+
+```bash
+java -jar nexus/target/nexus-1.0.0.jar generate --spec "Create a Spring REST controller for customer onboarding" --language=java --include-tests
+```
+
+Key options:
+
+- `--language=<lang>`: Target language (default `java`).
+- `--include-tests`: Ask the model to produce companion tests.
+- `--output=path`: Write the generated implementation to a file.
+- `--tests-output=path`: Write generated tests to a separate file.
+- `--model=gpt-4o-mini`: Override the model; defaults to `gpt-4o-mini`.
+- `--temperature=0.2`: Control creativity (0-1).
+
+Notes and generation metadata are printed after each run for quick validation. Remember to review and harden AI-generated code before deploying to production systems.
+
 ## License
 
 This project is licensed under the MIT License.
