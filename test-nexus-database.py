@@ -8,13 +8,13 @@ import argparse
 import json
 import os
 import time
+from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
 import psycopg2
-import urllib.request
 import urllib.error
-from contextlib import contextmanager
+import urllib.request
 
 
 def _get_env_value(*names: str, default=None, caster=None):
