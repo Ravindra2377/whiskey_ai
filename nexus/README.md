@@ -87,17 +87,27 @@ Once running, NEXUS is accessible at:
 
 NEXUS now supports a voice-driven interface backed by OpenAI Whisper.
 
-1. Export your OpenAI API key:
+1. Export your OpenAI API key (either variable name works):
 	```bash
 	export NEXUS_OPENAI_KEY=sk-...
+	# or
+	export OPENAI_API_KEY=sk-...
 	```
-	(On Windows PowerShell: `setx NEXUS_OPENAI_KEY "sk-..."` and restart the shell.)
+	(On Windows PowerShell: `setx NEXUS_OPENAI_KEY "sk-..."` or `setx OPENAI_API_KEY "sk-..."`, then restart the shell.)
 2. Connect a microphone and ensure your OS grants microphone permission to Java.
 3. Start the live assistant:
 	```bash
 	java -jar nexus/target/nexus-1.0.0.jar voice --live --echo
 	```
 4. Say "Hey NEXUS" followed by a command, e.g. "show system health". Say "Hey NEXUS exit" to quit.
+
+To validate your environment before going live, run:
+
+```bash
+java -jar nexus/target/nexus-1.0.0.jar voice --check-config
+```
+
+This confirms API keys, microphone support, and database logging availability.
 
 Voice interactions and their outcomes are automatically logged to PostgreSQL whenever the CLI is launched with database support enabled (`nexus.db.enabled=true`).
 
@@ -111,7 +121,7 @@ java -jar nexus/target/nexus-1.0.0.jar analytics --voice
 
 The `generate` command turns natural language specifications into production-ready code via OpenAI's GPT models.
 
-1. Ensure `NEXUS_OPENAI_KEY` is set (the same key used for voice features).
+1. Ensure `NEXUS_OPENAI_KEY` or `OPENAI_API_KEY` is set (the same key used for voice features).
 2. Describe the desired implementation:
 
 ```bash
@@ -128,6 +138,8 @@ Key options:
 - `--temperature=0.2`: Control creativity (0-1).
 
 Notes and generation metadata are printed after each run for quick validation. Remember to review and harden AI-generated code before deploying to production systems.
+
+Tip: Natural language requests like `nl "Hey NEXUS, generate a Python service with tests"` now route directly into the `generate` command.
 
 ## License
 

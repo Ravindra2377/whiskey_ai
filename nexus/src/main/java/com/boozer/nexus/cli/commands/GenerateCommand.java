@@ -84,7 +84,10 @@ public class GenerateCommand implements Command {
             openAiKey = System.getenv("NEXUS_OPENAI_KEY");
         }
         if (openAiKey == null || openAiKey.isBlank()) {
-            System.err.println("OpenAI API key missing. Use --openai-key=KEY or set NEXUS_OPENAI_KEY environment variable.");
+            openAiKey = System.getenv("OPENAI_API_KEY");
+        }
+        if (openAiKey == null || openAiKey.isBlank()) {
+            System.err.println("OpenAI API key missing. Use --openai-key=KEY or set NEXUS_OPENAI_KEY / OPENAI_API_KEY environment variables.");
             return 2;
         }
 

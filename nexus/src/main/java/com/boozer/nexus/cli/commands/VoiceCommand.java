@@ -27,7 +27,8 @@ public class VoiceCommand implements Command {
 
     @Override
     public String description() {
-        return "Voice assistant: use --file=audio.wav or --live for real-time capture (requires OpenAI Whisper key).";
+        return "Voice assistant: use --file=audio.wav or --live for real-time capture (requires OpenAI Whisper key)." +
+                " Include --check-config to validate microphone and API setup.";
     }
 
     @Override
@@ -35,6 +36,7 @@ public class VoiceCommand implements Command {
         String file = null;
         boolean echo = false;
         boolean live = false;
+        boolean check = false;
         String wakeWord = DEFAULT_WAKE_WORD;
         String openAiKey = null;
 
@@ -42,21 +44,67 @@ public class VoiceCommand implements Command {
             if (a.startsWith("--file=")) file = a.substring("--file=".length());
             if (a.equals("--echo")) echo = true;
             if (a.equals("--live")) live = true;
+            if (a.equals("--check-config")) check = true;
             if (a.startsWith("--wake-word=")) wakeWord = a.substring("--wake-word=".length()).trim();
             if (a.startsWith("--openai-key=")) openAiKey = a.substring("--openai-key=".length()).trim();
         }
 
+        String resolvedKey = resolveOpenAiKey(openAiKey);
+
+        if (check) {
+            return runConfigCheck(resolvedKey, live);
+        }
+
         if (live) {
-            return runLiveMode(openAiKey, wakeWord, echo);
+            return runLiveMode(resolvedKey, wakeWord, echo);
         }
 
         if (file == null) {
-            System.err.println("Usage: voice --file=audio.wav [--echo] | voice --live [--wake-word=phrase] [--echo]");
+            System.err.println("Usage: voice --file=audio.wav [--echo] | voice --live [--wake-word=phrase] [--echo] | voice --check-config");
             return 2;
         }
 
-        return runFileMode(file, echo, openAiKey)
+        return runFileMode(file, echo, resolvedKey)
                 .orElse(2);
+    }
+
+    private String resolveOpenAiKey(String explicit) {
+        if (explicit != null && !explicit.isBlank()) {
+            return explicit;
+        }
+        String key = System.getenv("NEXUS_OPENAI_KEY");
+        if (key == null || key.isBlank()) {
+            key = System.getenv("OPENAI_API_KEY");
+        }
+        return key;
+    }
+
+    private int runConfigCheck(String openAiKey, boolean liveRequested) {
+        System.out.println("NEXUS Voice Configuration Check");
+        boolean ok = true;
+
+        if (openAiKey == null || openAiKey.isBlank()) {
+            System.out.println("❌ OpenAI API key missing. Set NEXUS_OPENAI_KEY or OPENAI_API_KEY, or pass --openai-key=KEY.");
+            ok = false;
+        } else {
+            System.out.println("✅ OpenAI API key detected.");
+        }
+
+        if (AudioRecorder.isSupported()) {
+            System.out.println("✅ Microphone capture supported by this JVM.");
+        } else {
+            System.out.println("❌ Microphone capture not supported on this system.");
+            if (liveRequested) ok = false;
+        }
+
+        if (historyService != null) {
+            System.out.println("✅ Database logging enabled for voice commands.");
+        } else {
+            System.out.println("ℹ️  Database logging disabled (VoiceCommandLogService not available). Enable nexus.db.enabled=true to store history.");
+        }
+
+        System.out.println("Run `voice --live --echo` to start, or add --openai-key to override.");
+        return ok ? 0 : 1;
     }
 
     private Optional<Integer> runFileMode(String file, boolean echo, String openAiKey) {
@@ -93,14 +141,11 @@ public class VoiceCommand implements Command {
         }
     }
 
-    private int runLiveMode(String openAiKeyArg, String wakeWord, boolean echo) {
+    private int runLiveMode(String openAiKey, String wakeWord, boolean echo) {
         String resolvedWakeWord = wakeWord == null || wakeWord.isBlank() ? DEFAULT_WAKE_WORD : wakeWord.toLowerCase(Locale.ROOT);
-        String openAiKey = (openAiKeyArg == null || openAiKeyArg.isBlank())
-                ? System.getenv("NEXUS_OPENAI_KEY")
-                : openAiKeyArg;
 
         if (openAiKey == null || openAiKey.isBlank()) {
-            System.err.println("OpenAI API key not provided. Use --openai-key=KEY or set NEXUS_OPENAI_KEY environment variable.");
+            System.err.println("OpenAI API key not provided. Use --openai-key=KEY or set NEXUS_OPENAI_KEY / OPENAI_API_KEY environment variables.");
             return 2;
         }
         if (!AudioRecorder.isSupported()) {
