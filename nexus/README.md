@@ -13,6 +13,8 @@ NEXUS is an advanced AI-powered enterprise technical services platform that prov
 - Monitoring and feedback loops
 - Policy enforcement
 - Full PostgreSQL database integration for task persistence
+- Context-aware voice assistant with confirmations, repeats, and adaptive hints
+- Live voice analytics with REST endpoint and optional web dashboard
 
 ## Prerequisites
 
@@ -33,7 +35,25 @@ CREATE DATABASE boozer_db OWNER boozer_user;
 GRANT ALL PRIVILEGES ON DATABASE boozer_db TO boozer_user;
 ```
 
-The database configuration is in `src/main/resources/application.properties`.
+The database configuration is in `src/main/resources/application.properties`. CLI sessions also honour `src/main/resources/application-cli.yml`, which supports environment-driven toggles:
+
+```yaml
+nexus:
+	db:
+		enabled: ${NEXUS_DB_ENABLED:false}
+
+spring:
+	datasource:
+		url: ${NEXUS_DB_URL:}
+		username: ${NEXUS_DB_USER:}
+		password: ${NEXUS_DB_PASSWORD:}
+		driver-class-name: ${NEXUS_DB_DRIVER:org.postgresql.Driver}
+	jpa:
+		hibernate:
+			ddl-auto: ${NEXUS_DB_DDL:update}
+		show-sql: ${NEXUS_DB_SHOW_SQL:false}
+```
+Setting `NEXUS_DB_ENABLED=true` alongside your datasource credentials enables persistence and analytics without editing property files. Provide optional overrides for driver, schema management (`NEXUS_DB_DDL`) and SQL logging (`NEXUS_DB_SHOW_SQL`) as needed.
 
 ## Building and Running
 
@@ -117,10 +137,35 @@ This confirms API keys, microphone support, and database logging availability.
 
 Voice interactions and their outcomes are automatically logged to PostgreSQL whenever the CLI is launched with database support enabled (`nexus.db.enabled=true`).
 
+Conversation tips:
+
+- Say “repeat that” or “do it again” to replay the most recent successful automation.
+- If Nexus prompts for confirmation, simply answer “yes” or “no”; anything else cancels the pending action.
+- Adaptive hints appear when wake-word timing, microphone noise, or configuration issues are detected.
+
 To review voice usage analytics once logging is enabled:
 
 ```bash
 java -jar nexus/target/nexus-1.0.0.jar analytics --voice
+```
+
+Expose the same metrics for dashboards by adding `--server[=PORT]` (defaults to 8088):
+
+```bash
+java -jar nexus/target/nexus-1.0.0.jar analytics --voice --server
+# or specify a port
+java -jar nexus/target/nexus-1.0.0.jar analytics --voice --server=9090
+```
+
+The server provides an HTML summary at `/`, JSON metrics at `/metrics`, and a `/health` endpoint suitable for uptime checks.
+
+For a richer view, run the companion dashboard:
+
+```bash
+cd nexus/voice-analytics-dashboard
+npm install
+npm run start
+# Visit http://localhost:3000 and set the API base URL to your analytics port (default http://localhost:8088)
 ```
 
 ## AI Code Generation
@@ -145,8 +190,8 @@ Key options:
 
 Notes and generation metadata are printed after each run for quick validation. Remember to review and harden AI-generated code before deploying to production systems.
 
-Tip: Natural language requests like `nl "Hey NEXUS, generate a Python service with tests"` now route directly into the `generate` command.
-Natural language also understands deployment and compliance requests, e.g. `nl "deploy to staging"` or `nl "show compliance analytics"`.
+Tip: Natural language requests like `nl "Hey NEXUS, generate a Python service with tests"` now route directly into the `generate` command while maintaining conversational context. If NEXUS needs confirmation (for example, deployments or large code generations captured via voice), just reply "yes" to resume the pending action, or "no" to cancel.
+Natural language also understands voice analytics intents—ask `nl "start the voice analytics server"` to launch the HTTP endpoint or `nl "show top voice intents"` for a quick summary inside the CLI. See [`docs/voice-intent-flow.md`](docs/voice-intent-flow.md) for a full end-to-end sequence diagram of the voice pipeline.
 
 ## License
 

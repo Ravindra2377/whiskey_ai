@@ -1,5 +1,6 @@
 package com.boozer.nexus.cli;
 
+import com.boozer.nexus.nl.ConversationContext;
 import com.boozer.nexus.persistence.OperationCatalogPersistenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
@@ -41,24 +42,34 @@ public class NexusCliApplication implements CommandLineRunner {
                 .web(WebApplicationType.NONE) // disable web server
                 .bannerMode(Banner.Mode.OFF)
                 .logStartupInfo(false)
+        .properties("spring.config.additional-location=classpath:/application-cli.yml")
                 .run(args);
     }
 
     @Override
     public void run(String... args) {
-        var registry = new java.util.LinkedHashMap<String, com.boozer.nexus.cli.commands.Command>();
-        registry.put("health", new com.boozer.nexus.cli.commands.HealthCommand());
-        registry.put("version", new com.boozer.nexus.cli.commands.VersionCommand("NEXUS AI CLI v1.0.0"));
-        registry.put("ingest", new com.boozer.nexus.cli.commands.IngestCommand(persistenceService));
-        registry.put("catalog", new com.boozer.nexus.cli.commands.CatalogCommand());
-        registry.put("run", new com.boozer.nexus.cli.commands.RunCommand());
-        // New advanced commands
-        registry.put("nl", new com.boozer.nexus.cli.commands.NaturalLanguageCommand());
-        registry.put("suggest", new com.boozer.nexus.cli.commands.SuggestCommand());
-        registry.put("refactor", new com.boozer.nexus.cli.commands.RefactorCommand());
-        registry.put("analytics", new com.boozer.nexus.cli.commands.AnalyticsCommand(voiceCommandAnalyticsService));
-        registry.put("voice", new com.boozer.nexus.cli.commands.VoiceCommand(voiceCommandLogService));
-        registry.put("generate", new com.boozer.nexus.cli.commands.GenerateCommand());
+    var registry = new java.util.LinkedHashMap<String, com.boozer.nexus.cli.commands.Command>();
+
+    ConversationContext conversationContext = new ConversationContext();
+    var nlCommand = new com.boozer.nexus.cli.commands.NaturalLanguageCommand(
+        conversationContext,
+        voiceCommandAnalyticsService,
+        voiceCommandLogService);
+    var voiceCommand = new com.boozer.nexus.cli.commands.VoiceCommand(voiceCommandLogService, nlCommand);
+
+    registry.put("health", new com.boozer.nexus.cli.commands.HealthCommand());
+    registry.put("version", new com.boozer.nexus.cli.commands.VersionCommand("NEXUS AI CLI v1.0.0"));
+    registry.put("ingest", new com.boozer.nexus.cli.commands.IngestCommand(persistenceService));
+    registry.put("catalog", new com.boozer.nexus.cli.commands.CatalogCommand());
+    registry.put("run", new com.boozer.nexus.cli.commands.RunCommand());
+    registry.put("nl", nlCommand);
+    registry.put("suggest", new com.boozer.nexus.cli.commands.SuggestCommand());
+    registry.put("refactor", new com.boozer.nexus.cli.commands.RefactorCommand());
+    registry.put("analytics", new com.boozer.nexus.cli.commands.AnalyticsCommand(voiceCommandAnalyticsService));
+    registry.put("voice", voiceCommand);
+    registry.put("generate", new com.boozer.nexus.cli.commands.GenerateCommand());
+
+    nlCommand.setCommandRegistry(registry);
 
         if (args == null || args.length == 0) {
             printHelp(registry);

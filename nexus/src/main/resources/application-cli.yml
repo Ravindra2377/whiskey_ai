@@ -1,0 +1,14 @@
+nexus:
+  db:
+    enabled: ${NEXUS_DB_ENABLED:false}
+
+spring:
+  datasource:
+    url: ${NEXUS_DB_URL:}
+    username: ${NEXUS_DB_USER:}
+    password: ${NEXUS_DB_PASSWORD:}
+    driver-class-name: ${NEXUS_DB_DRIVER:org.postgresql.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: ${NEXUS_DB_DDL:update}
+    show-sql: ${NEXUS_DB_SHOW_SQL:false}
