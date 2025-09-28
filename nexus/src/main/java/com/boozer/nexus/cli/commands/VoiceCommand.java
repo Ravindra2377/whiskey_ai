@@ -4,8 +4,17 @@ import com.boozer.nexus.persistence.VoiceCommandLogService;
 import com.boozer.nexus.voice.AudioRecorder;
 import com.boozer.nexus.voice.VoiceErrorHints;
 import com.boozer.nexus.voice.WhisperClient;
+import com.boozer.nexus.voice.intelligence.IntelligentVoicePipeline;
+import com.boozer.nexus.voice.processing.TranscriptionResult;
+import com.boozer.nexus.voice.processing.VoiceProcessingResult;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,8 +42,8 @@ public class VoiceCommand implements Command {
 
     @Override
     public String description() {
-        return "Voice assistant: use --file=audio.wav or --live for real-time capture (requires OpenAI Whisper key)." +
-                " Include --check-config to validate microphone, analytics, and AI setup or --no-wake-word for continuous capture.";
+    return "Voice assistant: use --file=audio.wav or --live for real-time capture (requires OpenAI Whisper key)." +
+        " Add --intelligent for multi-stage analytics, --check-config to validate setup, or --no-wake-word for continuous capture.";
     }
 
     @Override
@@ -42,6 +51,7 @@ public class VoiceCommand implements Command {
         String file = null;
         boolean echo = false;
         boolean live = false;
+        boolean intelligent = false;
         boolean noWakeWord = false;
         boolean check = false;
         String wakeWord = DEFAULT_WAKE_WORD;
@@ -51,6 +61,7 @@ public class VoiceCommand implements Command {
             if (a.startsWith("--file=")) file = a.substring("--file=".length());
             if (a.equals("--echo")) echo = true;
             if (a.equals("--live")) live = true;
+            if (a.equals("--intelligent")) intelligent = true;
             if (a.equals("--no-wake-word")) noWakeWord = true;
             if (a.equals("--check-config")) check = true;
             if (a.startsWith("--wake-word=")) wakeWord = a.substring("--wake-word=".length()).trim();
@@ -59,20 +70,35 @@ public class VoiceCommand implements Command {
 
         String resolvedKey = resolveOpenAiKey(openAiKey);
 
-        if (check) {
-            return runConfigCheck(resolvedKey, live);
-        }
-
-        if (live) {
-            return runLiveMode(resolvedKey, wakeWord, echo, noWakeWord);
-        }
-
-        if (file == null) {
-            System.err.println("Usage: voice --file=audio.wav [--echo] | voice --live [--wake-word=phrase] [--echo] [--no-wake-word] | voice --check-config");
+        if (intelligent && !check && (resolvedKey == null || resolvedKey.isBlank())) {
+            System.err.println("Intelligent mode requires an OpenAI API key. Provide --openai-key=KEY or export NEXUS_OPENAI_KEY.");
             return 2;
         }
 
-        return runFileMode(file, echo, resolvedKey)
+        if (intelligent && !live && !check) {
+            live = true;
+            System.out.println("ℹ Intelligent voice mode enables live capture automatically.");
+        }
+
+        IntelligentVoicePipeline pipeline = null;
+        if (intelligent && !check) {
+            pipeline = IntelligentVoicePipeline.createDefault(resolvedKey);
+        }
+
+        if (check) {
+            return runConfigCheck(resolvedKey, live, intelligent);
+        }
+
+        if (live) {
+            return runLiveMode(resolvedKey, wakeWord, echo, noWakeWord, intelligent, pipeline);
+        }
+
+        if (file == null) {
+            System.err.println("Usage: voice --file=audio.wav [--echo] | voice --live [--intelligent] [--wake-word=phrase] [--echo] [--no-wake-word] | voice --check-config");
+            return 2;
+        }
+
+        return runFileMode(file, echo, resolvedKey, intelligent, pipeline)
                 .orElse(2);
     }
 
@@ -87,7 +113,7 @@ public class VoiceCommand implements Command {
         return key;
     }
 
-    private int runConfigCheck(String openAiKey, boolean liveRequested) {
+    private int runConfigCheck(String openAiKey, boolean liveRequested, boolean intelligentRequested) {
         System.out.println("NEXUS Voice Configuration Check");
         boolean ok = true;
 
@@ -96,6 +122,13 @@ public class VoiceCommand implements Command {
             ok = false;
         } else {
             System.out.println("✅ OpenAI API key detected.");
+        }
+
+        if (intelligentRequested) {
+            System.out.println("ℹ Intelligent pipeline requested: multi-stage analytics will use Whisper, biometrics heuristics, and emotion detection.");
+            if (openAiKey == null || openAiKey.isBlank()) {
+                System.out.println("   → Provide a valid key before enabling --intelligent.");
+            }
         }
 
         if (AudioRecorder.isSupported()) {
@@ -115,11 +148,15 @@ public class VoiceCommand implements Command {
             System.out.println("✅ Conversational AI pipeline active with resumable actions and analytics integration.");
         }
 
-        System.out.println("Run `voice --live --echo` to start, add --no-wake-word for continuous capture, or pass --openai-key=KEY to override.");
+        if (intelligentRequested) {
+            System.out.println("Run `voice --live --intelligent --echo` for adaptive streaming, add --no-wake-word for continuous capture, or override credentials with --openai-key=KEY.");
+        } else {
+            System.out.println("Run `voice --live --echo` to start, add --no-wake-word for continuous capture, or pass --openai-key=KEY to override.");
+        }
         return ok ? 0 : 1;
     }
 
-    private Optional<Integer> runFileMode(String file, boolean echo, String openAiKey) {
+    private Optional<Integer> runFileMode(String file, boolean echo, String openAiKey, boolean intelligent, IntelligentVoicePipeline pipeline) {
         Path path = Paths.get(file);
         if (!Files.exists(path)) {
             System.err.println("Audio file not found: " + path.toAbsolutePath());
@@ -127,6 +164,33 @@ public class VoiceCommand implements Command {
         }
 
         try {
+            if (intelligent) {
+                IntelligentVoicePipeline activePipeline = pipeline != null ? pipeline : IntelligentVoicePipeline.createDefault(openAiKey);
+                VoiceProcessingResult result = processFileWithPipeline(path, activePipeline);
+                Optional<TranscriptionResult> transcriptionOpt = result.getTranscription();
+                if (transcriptionOpt.isEmpty() || transcriptionOpt.get().getText().isBlank()) {
+                    System.err.println("No speech detected in file.");
+                    logHistory(DEFAULT_WAKE_WORD, "", "", null, false, "empty transcript");
+                    return Optional.of(3);
+                }
+
+                TranscriptionResult transcription = transcriptionOpt.get();
+                if (!transcription.isSuccess()) {
+                    System.err.println("Transcription failed: " + transcription.getError());
+                    logHistory(DEFAULT_WAKE_WORD, "", "", null, false, transcription.getError());
+                    return Optional.of(1);
+                }
+
+                String transcript = transcription.getText();
+                if (echo) {
+                    System.out.println("[voice:transcript] " + transcript);
+                }
+                printIntelligenceInsights(result);
+                System.out.println("[voice] -> nl: " + transcript);
+                int code = executeCommand(transcript, transcript, DEFAULT_WAKE_WORD);
+                return Optional.of(code);
+            }
+
             String transcript;
             if (openAiKey != null && !openAiKey.isBlank()) {
                 transcript = new WhisperClient(openAiKey).transcribe(path);
@@ -146,6 +210,14 @@ public class VoiceCommand implements Command {
             System.out.println("[voice] -> nl: " + transcript);
             int code = executeCommand(transcript, transcript, DEFAULT_WAKE_WORD);
             return Optional.of(code);
+        } catch (UnsupportedAudioFileException ex) {
+            System.err.println("Unsupported audio format: " + ex.getMessage());
+            logHistory(DEFAULT_WAKE_WORD, "", "", null, false, "unsupported audio format");
+            return Optional.of(1);
+        } catch (IOException ex) {
+            System.err.println("Error reading audio file: " + ex.getMessage());
+            logHistory(DEFAULT_WAKE_WORD, "", "", null, false, ex.getMessage());
+            return Optional.of(1);
         } catch (Exception ex) {
             System.err.println("Failed to process audio file: " + ex.getMessage());
             logHistory(DEFAULT_WAKE_WORD, "", "", null, false, ex.getMessage());
@@ -153,7 +225,7 @@ public class VoiceCommand implements Command {
         }
     }
 
-    private int runLiveMode(String openAiKey, String wakeWord, boolean echo, boolean noWakeWord) {
+    private int runLiveMode(String openAiKey, String wakeWord, boolean echo, boolean noWakeWord, boolean intelligent, IntelligentVoicePipeline pipeline) {
         String resolvedWakeWord = wakeWord == null || wakeWord.isBlank() ? DEFAULT_WAKE_WORD : wakeWord.toLowerCase(Locale.ROOT);
         TranscriptTracker tracker = new TranscriptTracker();
         int wakeWordMisses = 0;
@@ -173,7 +245,9 @@ public class VoiceCommand implements Command {
         } else {
             System.out.println("🎤 NEXUS voice mode active. Say '" + resolvedWakeWord + " ...' followed by a command. Say '" + resolvedWakeWord + " exit' to stop.");
         }
-        WhisperClient whisperClient = new WhisperClient(openAiKey);
+
+        IntelligentVoicePipeline activePipeline = intelligent ? (pipeline != null ? pipeline : IntelligentVoicePipeline.createDefault(openAiKey)) : null;
+        WhisperClient whisperClient = intelligent ? null : new WhisperClient(openAiKey);
 
         try (AudioRecorder recorder = new AudioRecorder()) {
             recorder.start();
@@ -198,33 +272,69 @@ public class VoiceCommand implements Command {
                 }
                 silentChunks = 0;
 
+                VoiceProcessingResult processingResult = null;
+                TranscriptionResult transcriptionResult = null;
                 String transcript;
-                try {
-                    transcript = whisperClient.transcribe(audio, recorder.getFormat());
-                } catch (Exception ex) {
-                    System.err.println("Whisper transcription failed: " + ex.getMessage());
-                    logHistory(resolvedWakeWord, "", "", null, false, ex.getMessage());
-                    continue;
-                }
 
-                if (transcript == null || transcript.isBlank()) {
-                    blankTranscriptEvents++;
-                    if (blankTranscriptEvents % BLANK_TRANSCRIPT_THRESHOLD == 0) {
-                        System.out.println("⚠️  I'm hearing silence or background noise. Move closer to the mic or re-run `voice --check-config`.");
-                        logHistory(resolvedWakeWord, "", "", "no-speech", false, "blank transcript chunk");
+                if (intelligent) {
+                    processingResult = activePipeline.process(audio, recorder.getFormat());
+                    if (processingResult == null || !processingResult.isVoiceDetected()) {
+                        continue;
                     }
-                    continue;
+                    Optional<TranscriptionResult> transcriptionOpt = processingResult.getTranscription();
+                    if (transcriptionOpt.isEmpty()) {
+                        blankTranscriptEvents++;
+                        if (blankTranscriptEvents % BLANK_TRANSCRIPT_THRESHOLD == 0) {
+                            System.out.println("⚠️  I'm hearing silence or background noise. Move closer to the mic or re-run `voice --check-config`.");
+                            logHistory(resolvedWakeWord, "", "", "no-speech", false, "no transcription");
+                        }
+                        continue;
+                    }
+                    transcriptionResult = transcriptionOpt.get();
+                    transcript = transcriptionResult.getText() == null ? "" : transcriptionResult.getText().trim();
+                    if (!transcriptionResult.isSuccess() || transcript.isBlank()) {
+                        blankTranscriptEvents++;
+                        if (blankTranscriptEvents % BLANK_TRANSCRIPT_THRESHOLD == 0) {
+                            System.out.println("⚠️  I'm hearing silence or background noise. Move closer to the mic or re-run `voice --check-config`.");
+                            String error = transcriptionResult.getError() == null ? "blank transcript chunk" : transcriptionResult.getError();
+                            logHistory(resolvedWakeWord, transcript, "", "no-speech", false, error);
+                        }
+                        continue;
+                    }
+                    blankTranscriptEvents = 0;
+                } else {
+                    try {
+                        transcript = whisperClient.transcribe(audio, recorder.getFormat());
+                    } catch (Exception ex) {
+                        System.err.println("Whisper transcription failed: " + ex.getMessage());
+                        logHistory(resolvedWakeWord, "", "", null, false, ex.getMessage());
+                        continue;
+                    }
+
+                    if (transcript == null || transcript.isBlank()) {
+                        blankTranscriptEvents++;
+                        if (blankTranscriptEvents % BLANK_TRANSCRIPT_THRESHOLD == 0) {
+                            System.out.println("⚠️  I'm hearing silence or background noise. Move closer to the mic or re-run `voice --check-config`.");
+                            logHistory(resolvedWakeWord, "", "", "no-speech", false, "blank transcript chunk");
+                        }
+                        continue;
+                    }
+                    transcript = transcript.trim();
+                    blankTranscriptEvents = 0;
                 }
-                blankTranscriptEvents = 0;
 
                 String delta = tracker.delta(transcript);
                 if (echo && !delta.isBlank()) {
                     System.out.println("[voice:transcript] " + delta);
                 }
 
+                if (intelligent && processingResult != null && !delta.isBlank()) {
+                    printIntelligenceInsights(processingResult);
+                }
+
                 boolean wakeWordHeard = !noWakeWord && transcript.toLowerCase(Locale.ROOT).contains(resolvedWakeWord);
-                String command = noWakeWord ? transcript.trim() : extractCommand(transcript, resolvedWakeWord);
-                if (command == null) {
+                String command = noWakeWord ? transcript : extractCommand(transcript, resolvedWakeWord);
+                if (command == null || command.isBlank()) {
                     if (wakeWordHeard) {
                         wakeWordMisses++;
                         if (wakeWordMisses % WAKE_WORD_HINT_THRESHOLD == 0) {
@@ -311,6 +421,75 @@ public class VoiceCommand implements Command {
         if (historyService != null) {
             historyService.record(wakeWord, transcript, commandText, intentLabel, success, error);
         }
+    }
+
+    private void printIntelligenceInsights(VoiceProcessingResult result) {
+        if (result == null) {
+            return;
+        }
+
+        StringJoiner joiner = new StringJoiner(" | ");
+        result.getTranscription().ifPresent(tx -> {
+            String provider = tx.getProvider() == null ? "unknown" : tx.getProvider();
+            joiner.add(String.format(Locale.ROOT, "provider=%s conf=%.2f", provider, tx.getConfidence()));
+            if (tx.getLatency() != null && !tx.getLatency().isZero()) {
+                joiner.add(String.format(Locale.ROOT, "latency=%dms", tx.getLatency().toMillis()));
+            }
+        });
+
+        if (result.getLanguageContext() != null) {
+            joiner.add(String.format(Locale.ROOT, "language=%s(%.2f)",
+                    result.getLanguageContext().getLocale(), result.getLanguageContext().getConfidence()));
+        }
+
+        if (result.getEmotionalContext() != null) {
+            joiner.add(String.format(Locale.ROOT, "emotion=%s(%.2f)",
+                    result.getEmotionalContext().getLabel(), result.getEmotionalContext().getConfidence()));
+        }
+
+        if (result.getSpeakerProfile() != null) {
+            joiner.add(String.format(Locale.ROOT, "speaker=%s(%.2f)",
+                    result.getSpeakerProfile().getSpeakerId(), result.getSpeakerProfile().getConfidence()));
+        }
+
+        joiner.add(String.format(Locale.ROOT, "overall=%.2f", result.getOverallConfidence()));
+
+        String summary = joiner.toString();
+        if (!summary.isBlank()) {
+            System.out.println("[voice:intel] " + summary);
+        }
+    }
+
+    private VoiceProcessingResult processFileWithPipeline(Path path, IntelligentVoicePipeline pipeline)
+            throws IOException, UnsupportedAudioFileException {
+        try (AudioInputStream baseStream = AudioSystem.getAudioInputStream(path.toFile())) {
+            AudioFormat baseFormat = baseStream.getFormat();
+            AudioFormat targetFormat = defaultPcmFormat();
+
+            if (!baseFormat.matches(targetFormat) && AudioSystem.isConversionSupported(targetFormat, baseFormat)) {
+                try (AudioInputStream converted = AudioSystem.getAudioInputStream(targetFormat, baseStream)) {
+                    byte[] audioBytes = toByteArray(converted);
+                    return pipeline.process(audioBytes, targetFormat);
+                }
+            }
+
+            byte[] audioBytes = toByteArray(baseStream);
+            return pipeline.process(audioBytes, baseFormat);
+        }
+    }
+
+    private byte[] toByteArray(AudioInputStream stream) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buffer = new byte[8192];
+        int read;
+        while ((read = stream.read(buffer)) != -1) {
+            out.write(buffer, 0, read);
+        }
+        return out.toByteArray();
+    }
+
+    private AudioFormat defaultPcmFormat() {
+        return new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 16_000F, 16, 1, 2, 16_000F, false);
     }
 
     private String simulateTranscription(Path audio) {

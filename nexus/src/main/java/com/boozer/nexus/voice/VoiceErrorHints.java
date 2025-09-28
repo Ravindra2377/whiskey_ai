@@ -52,5 +52,13 @@ public final class VoiceErrorHints {
         return message != null && message.toLowerCase(Locale.ROOT).contains(token.toLowerCase(Locale.ROOT));
     }
 
-    private record HintRule(Predicate<String> predicate, String hint) {}
+    private static final class HintRule {
+        private final Predicate<String> predicate;
+        private final String hint;
+
+        private HintRule(Predicate<String> predicate, String hint) {
+            this.predicate = predicate;
+            this.hint = hint;
+        }
+    }
 }

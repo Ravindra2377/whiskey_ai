@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 """
 NEXUS Database Integration Test
-This script validates the PostgreSQL integration for the NEXUS AI platform.
+
+This script validates the PostgreSQL integration for the NEXUS AI platform by:
+
+• Verifying database connectivity and required tables.
+• Exercising key REST endpoints (health/info) on the NEXUS API.
+• Optionally submitting a configurable test task and ensuring it reaches an
+    expected terminal status while persisting to PostgreSQL.
+
+Each phase is tracked with timing metadata, a rich console summary, and an
+optional JSON report for downstream automation.
 """
 
 import argparse
@@ -9,8 +18,8 @@ import json
 import os
 import time
 from contextlib import contextmanager
-from dataclasses import dataclass
-from typing import Optional, Tuple
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
 
 import psycopg2
 import urllib.error
@@ -39,6 +48,35 @@ DEFAULT_DB_NAME = _get_env_value("NEXUS_DB_NAME", "WHISKEY_DB_NAME", default="bo
 DEFAULT_DB_USER = _get_env_value("NEXUS_DB_USER", "WHISKEY_DB_USER", default="boozer_user")
 DEFAULT_DB_PASSWORD = _get_env_value("NEXUS_DB_PASSWORD", "WHISKEY_DB_PASSWORD", default="pASSWORD@11")
 DEFAULT_API_BASE = _get_env_value("NEXUS_API_BASE", "WHISKEY_API_BASE", default="http://localhost:8085/api/nexus")
+
+DEFAULT_JSON_OUTPUT_PATH = _get_env_value("NEXUS_DB_TEST_JSON", "WHISKEY_DB_TEST_JSON")
+DEFAULT_TASK_TYPE = _get_env_value("NEXUS_TEST_TASK_TYPE", "WHISKEY_TEST_TASK_TYPE", default="CODE_MODIFICATION")
+DEFAULT_TASK_DESCRIPTION = _get_env_value(
+    "NEXUS_TEST_TASK_DESCRIPTION",
+    "WHISKEY_TEST_TASK_DESCRIPTION",
+    default="Test task for database integration",
+)
+DEFAULT_TASK_CREATED_BY = _get_env_value(
+    "NEXUS_TEST_TASK_CREATED_BY",
+    "WHISKEY_TEST_TASK_CREATED_BY",
+    default="DATABASE_TEST",
+)
+DEFAULT_EXPECTED_STATUS = _get_env_value(
+    "NEXUS_EXPECTED_TASK_STATUS",
+    "WHISKEY_EXPECTED_TASK_STATUS",
+    default="COMPLETED",
+)
+
+
+def _default_task_parameters() -> Dict[str, Any]:
+    value = _get_env_value(
+        "NEXUS_TEST_TASK_PARAMETERS",
+        "WHISKEY_TEST_TASK_PARAMETERS",
+        caster=lambda raw: json.loads(raw),
+    )
+    if isinstance(value, dict):
+        return value
+    return {"test": True, "purpose": "database_integration_test"}
 
 
 def env_flag(*names: str, default: bool = False) -> bool:
@@ -93,6 +131,72 @@ class TestConfig:
     auto_confirm: bool = env_flag("NEXUS_AUTO_CONFIRM", "WHISKEY_AUTO_CONFIRM")
     skip_task_submission: bool = env_flag("NEXUS_SKIP_TASK", "WHISKEY_SKIP_TASK")
     cleanup_task: bool = True
+    json_output_path: Optional[str] = DEFAULT_JSON_OUTPUT_PATH
+    task_type: str = DEFAULT_TASK_TYPE
+    task_description: str = DEFAULT_TASK_DESCRIPTION
+    task_created_by: str = DEFAULT_TASK_CREATED_BY
+    task_parameters: Dict[str, Any] = field(default_factory=_default_task_parameters)
+    expected_status: Optional[str] = DEFAULT_EXPECTED_STATUS
+
+
+@dataclass
+class StepResult:
+    name: str
+    success: bool
+    duration: float
+    info: Optional[str] = None
+
+
+def _coerce_success(outcome) -> bool:
+    if isinstance(outcome, tuple) and outcome:
+        first = outcome[0]
+        if isinstance(first, bool):
+            return first
+    if isinstance(outcome, dict):
+        success_value = outcome.get("success")
+        if isinstance(success_value, bool):
+            return success_value
+    return bool(outcome)
+
+
+def print_summary(results: List[StepResult]) -> None:
+    if not results:
+        return
+    print()
+    print("===============================================")
+    print("Summary")
+    print("===============================================")
+    for result in results:
+        status_icon = "✓" if result.success else "✗"
+        info_suffix = f" - {result.info}" if result.info else ""
+        print(f"{status_icon} {result.name} ({result.duration:.2f}s){info_suffix}")
+
+
+def write_json_summary(path: str, results: List[StepResult], overall_success: bool) -> None:
+    payload = {
+        "overallSuccess": overall_success,
+        "generatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "totalDuration": sum(step.duration for step in results),
+        "steps": [
+            {
+                "name": step.name,
+                "success": step.success,
+                "duration": step.duration,
+                "info": step.info,
+            }
+            for step in results
+        ],
+    }
+
+    directory = os.path.dirname(path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2)
+        handle.write("\n")
+
+    print(f"Summary written to {path}")
 
 
 def parse_args() -> TestConfig:
@@ -150,11 +254,50 @@ def parse_args() -> TestConfig:
     parser.add_argument("--auto-confirm", action="store_true", help="Skip manual prompt to start NEXUS")
     parser.add_argument("--skip-task", action="store_true", help="Run connectivity tests only (skip task submission)")
     parser.add_argument("--no-cleanup", action="store_true", help="Retain the submitted test task in the database")
+    parser.add_argument(
+        "--json-output",
+        help="Write a JSON summary of the test run to the specified file path",
+        default=DEFAULT_JSON_OUTPUT_PATH,
+    )
+    parser.add_argument("--task-type", default=DEFAULT_TASK_TYPE, help="Task type to submit for the integration test")
+    parser.add_argument(
+        "--task-description",
+        default=DEFAULT_TASK_DESCRIPTION,
+        help="Task description used when submitting the integration test task",
+    )
+    parser.add_argument(
+        "--task-created-by",
+        default=DEFAULT_TASK_CREATED_BY,
+        help="Identifier recorded as the creator of the integration test task",
+    )
+    parser.add_argument(
+        "--task-parameters",
+        help="JSON object specifying task parameters to include in the submission",
+    )
+    parser.add_argument(
+        "--expected-status",
+        default=DEFAULT_EXPECTED_STATUS,
+        help="Expected terminal status for the test task (e.g. COMPLETED)",
+    )
 
     args = parser.parse_args()
     env_auto_confirm = env_flag("NEXUS_AUTO_CONFIRM", "WHISKEY_AUTO_CONFIRM")
     env_skip_task = env_flag("NEXUS_SKIP_TASK", "WHISKEY_SKIP_TASK")
     env_skip_cleanup = env_flag("NEXUS_SKIP_CLEANUP", "WHISKEY_SKIP_CLEANUP")
+    task_parameters = _default_task_parameters()
+    if args.task_parameters:
+        try:
+            parsed_params = json.loads(args.task_parameters)
+            if isinstance(parsed_params, dict):
+                task_parameters = parsed_params
+            else:
+                raise ValueError("Task parameters JSON must encode an object")
+        except (json.JSONDecodeError, ValueError) as exc:
+            raise SystemExit(f"Invalid --task-parameters value: {exc}") from exc
+
+    expected_status_raw = args.expected_status.upper().strip() if args.expected_status else None
+    expected_status = expected_status_raw or None
+
     return TestConfig(
         db_host=args.db_host,
         db_port=args.db_port,
@@ -170,6 +313,12 @@ def parse_args() -> TestConfig:
         auto_confirm=args.auto_confirm or env_auto_confirm,
         skip_task_submission=args.skip_task or env_skip_task,
         cleanup_task=not (args.no_cleanup or env_skip_cleanup),
+        json_output_path=args.json_output,
+        task_type=args.task_type,
+        task_description=args.task_description,
+        task_created_by=args.task_created_by,
+        task_parameters=task_parameters,
+        expected_status=expected_status,
     )
 
 
@@ -327,15 +476,11 @@ def submit_test_task(config: TestConfig) -> Optional[str]:
     """Submit a test task to NEXUS"""
     base_url = config.api_base_url
     
-    # Test task data
     task_data = {
-        "type": "CODE_MODIFICATION",
-        "description": "Test task for database integration",
-        "createdBy": "DATABASE_TEST",
-        "parameters": {
-            "test": True,
-            "purpose": "database_integration_test"
-        }
+        "type": config.task_type,
+        "description": config.task_description,
+        "createdBy": config.task_created_by,
+        "parameters": config.task_parameters,
     }
     
     try:
@@ -362,48 +507,79 @@ def submit_test_task(config: TestConfig) -> Optional[str]:
         return None
 
 
-def poll_task_status(config: TestConfig, task_id: str) -> Tuple[bool, Optional[str]]:
+def poll_task_status(config: TestConfig, task_id: str) -> Dict[str, Any]:
     """Poll the NEXUS task status endpoint until completion or retry limit reached."""
 
     endpoint = f"{config.api_base_url}/task/{task_id}"
-    last_status: Optional[str] = None
+    retries = max(config.status_retries, 0)
+    delay = max(config.status_retry_delay, 0.1)
+    expected = config.expected_status.upper() if config.expected_status else None
 
-    for attempt in range(max(config.status_retries, 0) + 1):
+    history: List[str] = []
+    last_status: Optional[str] = None
+    attempts = 0
+
+    for attempt in range(retries + 1):
+        attempts = attempt + 1
         try:
             status_code, data, raw = http_json_request(
                 "GET",
                 endpoint,
                 timeout=5,
                 retries=0,
-                retry_delay=config.status_retry_delay,
+                retry_delay=delay,
             )
         except urllib.error.URLError as exc:
-            last_status = f"connection-error: {exc.reason}"
-            print(f"✗ Attempt {attempt + 1}: unable to reach task status endpoint ({exc.reason})")
+            last_status = f"connection-error:{exc.reason}"
+            history.append(last_status)
+            print(f"✗ Attempt {attempts}: unable to reach task status endpoint ({exc.reason})")
         except Exception as exc:  # pragma: no cover - defensive
-            last_status = f"error: {exc}"
-            print(f"✗ Attempt {attempt + 1}: error checking task status: {exc}")
+            last_status = f"error:{exc}"
+            history.append(last_status)
+            print(f"✗ Attempt {attempts}: error checking task status: {exc}")
         else:
             if status_code == 200 and isinstance(data, dict):
                 current_status = data.get("status") or data.get("taskStatus")
-                last_status = str(current_status) if current_status is not None else None
-                print(f"• Task status (attempt {attempt + 1}/{config.status_retries + 1}): {last_status}")
+                normalized = str(current_status) if current_status is not None else None
+                last_status = normalized
+                history.append(normalized or "<no-status>")
+                print(f"• Task status (attempt {attempts}/{retries + 1}): {normalized}")
 
-                if current_status and current_status.upper() in {"COMPLETED", "FAILED", "CANCELLED"}:
-                    return True, last_status
+                if normalized and normalized.upper() in {"COMPLETED", "FAILED", "CANCELLED"}:
+                    matches_expected = expected is None or normalized.upper() == expected
+                    return {
+                        "success": matches_expected,
+                        "terminal": True,
+                        "status": normalized,
+                        "matchesExpected": matches_expected,
+                        "expectedStatus": config.expected_status,
+                        "attempts": attempts,
+                        "history": history,
+                    }
             elif status_code == 404:
                 last_status = "not-found"
-                print(f"⚠ Task {task_id} not yet visible via API (attempt {attempt + 1})")
+                history.append(last_status)
+                print(f"⚠ Task {task_id} not yet visible via API (attempt {attempts})")
             else:
                 last_status = f"unexpected-status:{status_code}"
+                history.append(last_status)
                 details = raw if raw else "<no body>"
                 print(f"⚠ Unexpected response ({status_code}): {details}")
 
-        if attempt < max(config.status_retries, 0):
-            time.sleep(max(config.status_retry_delay, 0.1))
+        if attempt < retries:
+            time.sleep(delay)
 
     print("⚠ Task did not reach a terminal state within polling window")
-    return False, last_status
+    matches_expected = False
+    return {
+        "success": False,
+        "terminal": False,
+        "status": last_status,
+        "matchesExpected": matches_expected,
+        "expectedStatus": config.expected_status,
+        "attempts": attempts,
+        "history": history,
+    }
 
 
 def check_task_in_database(config: TestConfig, task_id: str) -> bool:
@@ -486,6 +662,55 @@ def cleanup_test_task(config: TestConfig, task_id: str) -> bool:
 def main() -> int:
     config = parse_args()
 
+    results: List[StepResult] = []
+    exit_code = 0
+
+    def run_step(
+        name: str,
+        func,
+        *,
+        info_success=None,
+        info_failure=None,
+        critical: bool = True,
+    ):
+        nonlocal exit_code
+        start = time.perf_counter()
+        info: Optional[str] = None
+        outcome = None
+        try:
+            outcome = func()
+            success = _coerce_success(outcome)
+        except Exception as exc:  # pragma: no cover - defensive guard
+            success = False
+            info = f"Exception: {exc}"
+            print(f"✗ {name} encountered an unexpected error: {exc}")
+        duration = time.perf_counter() - start
+
+        if success and info_success:
+            info = info_success(outcome)
+        elif not success and info_failure and info is None:
+            info = info_failure(outcome)
+
+        results.append(StepResult(name=name, success=success, duration=duration, info=info))
+
+        if not success and critical:
+            exit_code = 1
+
+        return success, outcome
+
+    def finalize() -> int:
+        overall_success = exit_code == 0
+        print_summary(results)
+        print(f"Overall result: {'PASS' if overall_success else 'FAIL'}")
+        if config.json_output_path:
+            try:
+                write_json_summary(config.json_output_path, results, overall_success)
+            except Exception as exc:  # pragma: no cover - defensive
+                print(f"⚠ Unable to write JSON summary: {exc}")
+                if overall_success:
+                    print("  (This warning does not affect the test result.)")
+        return exit_code
+
     print("===============================================")
     print("NEXUS AI Database Integration Test")
     print("===============================================")
@@ -495,27 +720,52 @@ def main() -> int:
 
     prompt_nexus_start(config.auto_confirm)
 
-    if not test_database_connection(config):
+    db_success, _ = run_step(
+        "Database connectivity",
+        lambda: test_database_connection(config),
+        info_success=lambda _: "Connection verified",
+        info_failure=lambda _: "Connection attempt failed",
+    )
+    if not db_success:
         print("Database connection test failed. Exiting.")
-        return 1
+        return finalize()
 
     print()
 
-    if not test_nexus_api(config):
+    api_success, _ = run_step(
+        "NEXUS API availability",
+        lambda: test_nexus_api(config),
+        info_success=lambda _: "Health and info endpoints reachable",
+        info_failure=lambda _: "API checks failed",
+    )
+    if not api_success:
         print("NEXUS API test failed. Exiting.")
-        return 1
+        return finalize()
 
     if config.skip_task_submission:
         print()
         print("Skipping task submission per configuration. Connectivity checks passed.")
-        return 0
+        results.append(
+            StepResult(
+                name="Task submission",
+                success=True,
+                duration=0.0,
+                info="Skipped per configuration",
+            )
+        )
+        return finalize()
 
     print()
     print("Submitting test task...")
-    task_id = submit_test_task(config)
-    if not task_id:
+    submission_success, task_id = run_step(
+        "Submit test task",
+        lambda: submit_test_task(config),
+        info_success=lambda tid: f"Task ID {tid}",
+        info_failure=lambda _: "Submission failed",
+    )
+    if not submission_success or not task_id:
         print("Failed to submit test task. Exiting.")
-        return 1
+        return finalize()
 
     if config.wait_seconds > 0:
         print()
@@ -524,24 +774,64 @@ def main() -> int:
 
     print()
     print("Polling task status via API...")
-    api_terminal, observed_status = poll_task_status(config, task_id)
-    if api_terminal:
+    poll_success, poll_outcome = run_step(
+        "Poll task status via API",
+        lambda: poll_task_status(config, task_id),
+        info_success=lambda outcome: (
+            f"Status {outcome.get('status')}" if isinstance(outcome, dict) else "Status unknown"
+        ),
+        info_failure=lambda outcome: (
+            "No status reported"
+            if not isinstance(outcome, dict)
+            else (
+                f"Status {outcome.get('status')} (expected {outcome.get('expectedStatus')})"
+                if outcome.get('expectedStatus')
+                else f"Status {outcome.get('status')}"
+            )
+        ),
+        critical=False,
+    )
+    api_terminal = False
+    observed_status: Optional[str] = None
+    matches_expected = True
+    if isinstance(poll_outcome, dict):
+        api_terminal = bool(poll_outcome.get("terminal"))
+        observed_status = poll_outcome.get("status")
+        matches_expected = bool(poll_outcome.get("matchesExpected", True))
+    if api_terminal and matches_expected:
         print(f"✓ API reported terminal status: {observed_status}")
+    elif api_terminal and not matches_expected:
+        print(
+            f"⚠ Task reached terminal status {observed_status}, but expected {config.expected_status}"
+        )
     else:
         print("⚠ Task did not report a terminal status via API within the allotted polling attempts")
 
     print()
     print("Checking task in database...")
-    if check_task_in_database(config, task_id):
+    db_check_success, _ = run_step(
+        "Verify task in database",
+        lambda: check_task_in_database(config, task_id),
+        info_success=lambda _: f"Task {task_id} present",
+        info_failure=lambda _: "Task not located",
+    )
+
+    if db_check_success:
         print()
         print("🎉 Database integration test completed successfully!")
         print("   NEXUS is properly connected to PostgreSQL")
 
         if config.cleanup_task:
             print()
-            cleanup_test_task(config, task_id)
+            run_step(
+                "Cleanup test task",
+                lambda: cleanup_test_task(config, task_id),
+                info_success=lambda _: f"Task {task_id} removed",
+                info_failure=lambda _: "Cleanup skipped or not required",
+                critical=False,
+            )
 
-        return 0
+        return finalize()
 
     print()
     print("❌ Database integration test failed!")
@@ -549,9 +839,15 @@ def main() -> int:
 
     if config.cleanup_task:
         print()
-        cleanup_test_task(config, task_id)
+        run_step(
+            "Cleanup test task",
+            lambda: cleanup_test_task(config, task_id),
+            info_success=lambda _: f"Task {task_id} removed",
+            info_failure=lambda _: "Cleanup skipped or not required",
+            critical=False,
+        )
 
-    return 1
+    return finalize()
 
 if __name__ == "__main__":
     exit(main())
