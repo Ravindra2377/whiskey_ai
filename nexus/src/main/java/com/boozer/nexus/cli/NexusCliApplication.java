@@ -1,5 +1,6 @@
 package com.boozer.nexus.cli;
 
+import com.boozer.nexus.cli.intelligence.EnhancedCliService;
 import com.boozer.nexus.nl.ConversationContext;
 import com.boozer.nexus.persistence.OperationCatalogPersistenceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,7 @@ public class NexusCliApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
     var registry = new java.util.LinkedHashMap<String, com.boozer.nexus.cli.commands.Command>();
+    EnhancedCliService enhancedCliService = new EnhancedCliService();
 
     ConversationContext conversationContext = new ConversationContext();
     var nlCommand = new com.boozer.nexus.cli.commands.NaturalLanguageCommand(
@@ -57,10 +59,10 @@ public class NexusCliApplication implements CommandLineRunner {
         voiceCommandLogService);
     var voiceCommand = new com.boozer.nexus.cli.commands.VoiceCommand(voiceCommandLogService, nlCommand);
 
-    registry.put("health", new com.boozer.nexus.cli.commands.HealthCommand());
+    registry.put("health", new com.boozer.nexus.cli.commands.HealthCommand(enhancedCliService));
     registry.put("version", new com.boozer.nexus.cli.commands.VersionCommand("NEXUS AI CLI v1.0.0"));
     registry.put("ingest", new com.boozer.nexus.cli.commands.IngestCommand(persistenceService));
-    registry.put("catalog", new com.boozer.nexus.cli.commands.CatalogCommand());
+    registry.put("catalog", new com.boozer.nexus.cli.commands.CatalogCommand(enhancedCliService));
     registry.put("run", new com.boozer.nexus.cli.commands.RunCommand());
     registry.put("nl", nlCommand);
     registry.put("suggest", new com.boozer.nexus.cli.commands.SuggestCommand());
