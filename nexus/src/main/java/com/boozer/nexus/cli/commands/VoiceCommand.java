@@ -28,6 +28,7 @@ public class VoiceCommand implements Command {
     private static final String DEFAULT_WAKE_WORD = "hey nexus";
     private static final int WAKE_WORD_HINT_THRESHOLD = 2;
     private static final int BLANK_TRANSCRIPT_THRESHOLD = 3;
+    private static final ConsoleGlyphs GLYPHS = ConsoleGlyphs.detect();
 
     private final VoiceCommandLogService historyService;
     private final NaturalLanguageCommand naturalLanguage;
@@ -77,7 +78,7 @@ public class VoiceCommand implements Command {
 
         if (intelligent && !live && !check) {
             live = true;
-            System.out.println("ℹ Intelligent voice mode enables live capture automatically.");
+            System.out.println(GLYPHS.info("Intelligent voice mode enables live capture automatically."));
         }
 
         IntelligentVoicePipeline pipeline = null;
@@ -118,34 +119,34 @@ public class VoiceCommand implements Command {
         boolean ok = true;
 
         if (openAiKey == null || openAiKey.isBlank()) {
-            System.out.println("❌ OpenAI API key missing. Set NEXUS_OPENAI_KEY or OPENAI_API_KEY, or pass --openai-key=KEY.");
+            System.out.println(GLYPHS.error("OpenAI API key missing. Set NEXUS_OPENAI_KEY or OPENAI_API_KEY, or pass --openai-key=KEY."));
             ok = false;
         } else {
-            System.out.println("✅ OpenAI API key detected.");
+            System.out.println(GLYPHS.success("OpenAI API key detected."));
         }
 
         if (intelligentRequested) {
-            System.out.println("ℹ Intelligent pipeline requested: multi-stage analytics will use Whisper, biometrics heuristics, and emotion detection.");
+            System.out.println(GLYPHS.info("Intelligent pipeline requested: multi-stage analytics will use Whisper, biometrics heuristics, and emotion detection."));
             if (openAiKey == null || openAiKey.isBlank()) {
                 System.out.println("   → Provide a valid key before enabling --intelligent.");
             }
         }
 
         if (AudioRecorder.isSupported()) {
-            System.out.println("✅ Microphone capture supported by this JVM.");
+            System.out.println(GLYPHS.success("Microphone capture supported by this JVM."));
         } else {
-            System.out.println("❌ Microphone capture not supported on this system.");
+            System.out.println(GLYPHS.error("Microphone capture not supported on this system."));
             if (liveRequested) ok = false;
         }
 
         if (historyService != null) {
-            System.out.println("✅ Database logging enabled for voice commands.");
+            System.out.println(GLYPHS.success("Database logging enabled for voice commands."));
         } else {
-            System.out.println("ℹ️  Database logging disabled (VoiceCommandLogService not available). Enable nexus.db.enabled=true to store history.");
+            System.out.println(GLYPHS.info("Database logging disabled (VoiceCommandLogService not available). Enable nexus.db.enabled=true to store history."));
         }
 
         if (naturalLanguage != null) {
-            System.out.println("✅ Conversational AI pipeline active with resumable actions and analytics integration.");
+            System.out.println(GLYPHS.success("Conversational AI pipeline active with resumable actions and analytics integration."));
         }
 
         if (intelligentRequested) {
@@ -241,9 +242,9 @@ public class VoiceCommand implements Command {
         }
 
         if (noWakeWord) {
-            System.out.println("🎤 NEXUS voice mode active (continuous). Speak commands directly or say 'exit' to finish.");
+            System.out.println(GLYPHS.mic("NEXUS voice mode active (continuous). Speak commands directly or say 'exit' to finish."));
         } else {
-            System.out.println("🎤 NEXUS voice mode active. Say '" + resolvedWakeWord + " ...' followed by a command. Say '" + resolvedWakeWord + " exit' to stop.");
+            System.out.println(GLYPHS.mic("NEXUS voice mode active. Say '" + resolvedWakeWord + " ...' followed by a command. Say '" + resolvedWakeWord + " exit' to stop."));
         }
 
         IntelligentVoicePipeline activePipeline = intelligent ? (pipeline != null ? pipeline : IntelligentVoicePipeline.createDefault(openAiKey)) : null;
@@ -259,11 +260,11 @@ public class VoiceCommand implements Command {
                 if (audio.length == 0) {
                     silentChunks++;
                     if (echo && silentChunks % 5 == 0) {
-                        System.out.println("…listening…");
+                        System.out.println(GLYPHS.listeningCue());
                     }
                     if (silentChunks >= 15) {
                         if (recorder.restart()) {
-                            System.out.println("🔄 Microphone capture restarted.");
+                            System.out.println(GLYPHS.restart("Microphone capture restarted."));
                             silentChunks = 0;
                             continue;
                         }
@@ -285,7 +286,7 @@ public class VoiceCommand implements Command {
                     if (transcriptionOpt.isEmpty()) {
                         blankTranscriptEvents++;
                         if (blankTranscriptEvents % BLANK_TRANSCRIPT_THRESHOLD == 0) {
-                            System.out.println("⚠️  I'm hearing silence or background noise. Move closer to the mic or re-run `voice --check-config`.");
+                            System.out.println(GLYPHS.warning("I'm hearing silence or background noise. Move closer to the mic or re-run `voice --check-config`."));
                             logHistory(resolvedWakeWord, "", "", "no-speech", false, "no transcription");
                         }
                         continue;
@@ -295,7 +296,7 @@ public class VoiceCommand implements Command {
                     if (!transcriptionResult.isSuccess() || transcript.isBlank()) {
                         blankTranscriptEvents++;
                         if (blankTranscriptEvents % BLANK_TRANSCRIPT_THRESHOLD == 0) {
-                            System.out.println("⚠️  I'm hearing silence or background noise. Move closer to the mic or re-run `voice --check-config`.");
+                            System.out.println(GLYPHS.warning("I'm hearing silence or background noise. Move closer to the mic or re-run `voice --check-config`."));
                             String error = transcriptionResult.getError() == null ? "blank transcript chunk" : transcriptionResult.getError();
                             logHistory(resolvedWakeWord, transcript, "", "no-speech", false, error);
                         }
@@ -314,7 +315,7 @@ public class VoiceCommand implements Command {
                     if (transcript == null || transcript.isBlank()) {
                         blankTranscriptEvents++;
                         if (blankTranscriptEvents % BLANK_TRANSCRIPT_THRESHOLD == 0) {
-                            System.out.println("⚠️  I'm hearing silence or background noise. Move closer to the mic or re-run `voice --check-config`.");
+                            System.out.println(GLYPHS.warning("I'm hearing silence or background noise. Move closer to the mic or re-run `voice --check-config`."));
                             logHistory(resolvedWakeWord, "", "", "no-speech", false, "blank transcript chunk");
                         }
                         continue;
@@ -338,7 +339,7 @@ public class VoiceCommand implements Command {
                     if (wakeWordHeard) {
                         wakeWordMisses++;
                         if (wakeWordMisses % WAKE_WORD_HINT_THRESHOLD == 0) {
-                            System.out.println("⚠️  I heard '" + resolvedWakeWord + "' but not the command. Pause briefly after the wake word or choose a shorter phrase.");
+                            System.out.println(GLYPHS.warning("I heard '" + resolvedWakeWord + "' but not the command. Pause briefly after the wake word or choose a shorter phrase."));
                             logHistory(resolvedWakeWord, transcript, "", "wake-word-miss", false, "wake word detected without command");
                         }
                     }
@@ -347,14 +348,14 @@ public class VoiceCommand implements Command {
                 wakeWordMisses = 0;
 
                 if (isExitCommand(command)) {
-                    System.out.println("👋 Exiting voice mode.");
+                    System.out.println(GLYPHS.exit("Exiting voice mode."));
                     logHistory(resolvedWakeWord, transcript, command, "exit", true, null);
                     return 0;
                 }
 
                 int code = executeCommand(command, transcript, noWakeWord ? "(no wake word)" : resolvedWakeWord);
                 if (code == 0) {
-                    System.out.println("✔ Command completed: " + command);
+                    System.out.println(GLYPHS.complete("Command completed: " + command));
                 } else {
                     System.err.println("Command returned exit code " + code);
                 }
@@ -507,6 +508,59 @@ public class VoiceCommand implements Command {
         StringJoiner joiner = new StringJoiner(" | ");
         messages.forEach(joiner::add);
         return joiner.toString();
+    }
+
+    private static final class ConsoleGlyphs {
+        private final boolean asciiOnly;
+
+        private ConsoleGlyphs(boolean asciiOnly) {
+            this.asciiOnly = asciiOnly;
+        }
+
+        static ConsoleGlyphs detect() {
+            boolean ascii = true;
+
+            String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+            if (!os.contains("win")) {
+                ascii = false;
+            }
+
+            String lang = System.getenv("LANG");
+            if (lang != null && lang.toLowerCase(Locale.ROOT).contains("utf")) {
+                ascii = false;
+            }
+
+            String term = System.getenv("TERM");
+            if (term != null) {
+                String lower = term.toLowerCase(Locale.ROOT);
+                if (lower.contains("xterm") || lower.contains("screen") || lower.contains("vt100")) {
+                    ascii = false;
+                }
+            }
+
+            if (System.getenv("WT_SESSION") != null || System.getenv("ConEmuPID") != null) {
+                ascii = false;
+            }
+
+            return new ConsoleGlyphs(ascii);
+        }
+
+        String success(String message) { return decorate(asciiOnly ? "[OK]" : "✅", message); }
+        String error(String message) { return decorate(asciiOnly ? "[X]" : "❌", message); }
+        String info(String message) { return decorate(asciiOnly ? "[i]" : "ℹ", message); }
+        String warning(String message) { return decorate(asciiOnly ? "[!]" : "⚠", message); }
+        String mic(String message) { return decorate(asciiOnly ? "[mic]" : "🎤", message); }
+        String restart(String message) { return decorate(asciiOnly ? "[restart]" : "🔄", message); }
+        String exit(String message) { return decorate(asciiOnly ? "[bye]" : "👋", message); }
+        String complete(String message) { return decorate(asciiOnly ? "[done]" : "✔", message); }
+        String listeningCue() { return asciiOnly ? "...listening..." : "…listening…"; }
+
+        private String decorate(String glyph, String message) {
+            if (message == null || message.isBlank()) {
+                return glyph;
+            }
+            return glyph + " " + message;
+        }
     }
 
     private static class TranscriptTracker {
