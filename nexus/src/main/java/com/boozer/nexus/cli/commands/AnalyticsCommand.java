@@ -3,7 +3,9 @@ package com.boozer.nexus.cli.commands;
 import com.boozer.nexus.cli.model.OperationDescriptor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.boozer.nexus.cli.intelligence.EnhancedCliService;
+import com.boozer.nexus.cli.intelligence.EnhancedCliRequest;
+import com.boozer.nexus.cli.intelligence.EnhancedCliResult;
 import com.boozer.nexus.cli.server.VoiceAnalyticsHttpServer;
 
 import java.nio.file.Files;
@@ -15,20 +17,26 @@ import java.util.stream.Collectors;
 
 public class AnalyticsCommand implements Command {
     private final com.boozer.nexus.persistence.VoiceCommandAnalyticsService voiceAnalyticsService;
+    private final EnhancedCliService enhancedCliService;
 
     public AnalyticsCommand() {
-        this(null);
+        this(null, new EnhancedCliService());
     }
 
     public AnalyticsCommand(com.boozer.nexus.persistence.VoiceCommandAnalyticsService voiceAnalyticsService) {
+        this(voiceAnalyticsService, new EnhancedCliService());
+    }
+
+    public AnalyticsCommand(com.boozer.nexus.persistence.VoiceCommandAnalyticsService voiceAnalyticsService, EnhancedCliService enhancedCliService) {
         this.voiceAnalyticsService = voiceAnalyticsService;
+        this.enhancedCliService = enhancedCliService;
     }
     @Override
     public String name() { return "analytics"; }
 
     @Override
     public String description() {
-    return "Predictive analytics: default catalog insights or --voice for live voice metrics";
+        return "Predictive analytics: default catalog insights or --voice for live voice metrics (add --intelligent for GPT-4 insights)";
     }
 
     @Override
@@ -36,6 +44,9 @@ public class AnalyticsCommand implements Command {
         boolean voice = false;
         boolean server = false;
         Integer serverPort = null;
+        boolean intelligent = false;
+        String openAiKey = null;
+        String workspaceCode = null;
 
         for (String arg : args) {
             if ("--voice".equals(arg)) {
@@ -51,6 +62,19 @@ public class AnalyticsCommand implements Command {
                     }
                 }
             }
+            if ("--intelligent".equals(arg)) {
+                intelligent = true;
+            }
+            if (arg.startsWith("--intelligent=")) {
+                String value = arg.substring("--intelligent=".length());
+                intelligent = value.equalsIgnoreCase("true") || value.isBlank();
+            }
+            if (arg.startsWith("--openai-key=")) {
+                openAiKey = arg.substring("--openai-key=".length()).trim();
+            }
+            if (arg.startsWith("--workspace=")) {
+                workspaceCode = arg.substring("--workspace=".length()).trim();
+            }
         }
 
         if (server) {
@@ -65,41 +89,84 @@ public class AnalyticsCommand implements Command {
             return renderVoiceAnalytics(server, serverPort);
         }
 
-        Path catalogPath = resolveCatalog(args);
+    Path catalogPath = workspaceCode != null ? resolveCatalogForWorkspace(workspaceCode) : resolveCatalog(args);
+    private Path resolveCatalogForWorkspace(String workspaceCode) {
+        // Try to find workspace-specific catalog file
+        Path workspaceDir = Paths.get(Objects.requireNonNullElse(System.getProperty("nexus.root"), Paths.get("").toAbsolutePath().toString()));
+        Path candidate = workspaceDir.resolve(workspaceCode).resolve("operations-catalog.json");
+        if (Files.exists(candidate)) {
+            return candidate;
+        }
+        // Fallback: search for catalog file in workspace root
+        candidate = workspaceDir.resolve(workspaceCode + "-operations-catalog.json");
+        if (Files.exists(candidate)) {
+            return candidate;
+        }
+        // Fallback: default catalog
+        return resolveCatalog(new String[0]);
+    }
         List<OperationDescriptor> ops = readCatalog(catalogPath);
-        System.out.println("Analytics for catalog: " + catalogPath.toAbsolutePath());
-        System.out.println("Total operations: " + ops.size());
+        StringBuilder sb = new StringBuilder();
+        sb.append("Analytics for catalog: ").append(catalogPath.toAbsolutePath()).append(System.lineSeparator());
+        sb.append("Total operations: ").append(ops.size()).append(System.lineSeparator());
 
         Map<String, Long> byType = ops.stream().collect(Collectors.groupingBy(o -> opt(o.type), LinkedHashMap::new, Collectors.counting()));
-        System.out.println("By type:");
-        byType.forEach((k,v) -> System.out.printf("  %-12s %d%n", k, v));
+        sb.append("By type:").append(System.lineSeparator());
+        byType.forEach((k,v) -> sb.append(String.format("  %-12s %d%n", k, v)));
 
         Map<String, Long> byTag = new LinkedHashMap<>();
         for (OperationDescriptor o : ops) {
             if (o.tags == null) continue;
             for (String t : o.tags) byTag.merge(t.toLowerCase(Locale.ROOT), 1L, Long::sum);
         }
-        System.out.println("Top tags:");
+        sb.append("Top tags:").append(System.lineSeparator());
         byTag.entrySet().stream().sorted((a,b)->Long.compare(b.getValue(), a.getValue())).limit(10)
-                .forEach(e -> System.out.printf("  %-12s %d%n", e.getKey(), e.getValue()));
+                .forEach(e -> sb.append(String.format("  %-12s %d%n", e.getKey(), e.getValue())));
 
-        // Very naive 30-day projection: assume linear growth of ops by tag based on current composition
         int days = 30;
-        System.out.println("\n30-day Projection (naive):");
+        sb.append("\n30-day Projection (naive):").append(System.lineSeparator());
         for (Map.Entry<String, Long> e : byType.entrySet()) {
             long current = e.getValue();
             long projected = current + Math.max(1, current / 10); // +10%
-            System.out.printf("  %-12s %d -> ~%d%n", e.getKey(), current, projected);
+            sb.append(String.format("  %-12s %d -> ~%d%n", e.getKey(), current, projected));
         }
 
-        // Hotspots by folder
-        System.out.println("\nHotspots (top folders):");
+        sb.append("\nHotspots (top folders):").append(System.lineSeparator());
         Map<String, Long> byFolder = ops.stream().collect(Collectors.groupingBy(o -> topFolder(opt(o.path)), LinkedHashMap::new, Collectors.counting()));
         byFolder.entrySet().stream().sorted((a,b)->Long.compare(b.getValue(), a.getValue())).limit(10)
-                .forEach(e -> System.out.printf("  %-20s %d%n", e.getKey(), e.getValue()));
+                .forEach(e -> sb.append(String.format("  %-20s %d%n", e.getKey(), e.getValue())));
 
-        // Timeline stub (since we have no commit history here)
-        System.out.println("\nTimeline (stub): today=" + LocalDate.now() + ", next checkpoint=" + LocalDate.now().plusDays(30));
+        sb.append("\nTimeline (stub): today=").append(LocalDate.now()).append(", next checkpoint=").append(LocalDate.now().plusDays(30)).append(System.lineSeparator());
+
+        String output = sb.toString();
+        System.out.print(output);
+
+        if (intelligent) {
+            Map<String, Object> context = new LinkedHashMap<>();
+            context.put("catalogPath", catalogPath.toAbsolutePath().toString());
+            context.put("totalOperations", ops.size());
+            context.put("byType", byType);
+            context.put("byTag", byTag);
+            context.put("byFolder", byFolder);
+            context.put("projectionDays", days);
+            EnhancedCliResult aiResult = enhancedCliService.enhance(
+                    EnhancedCliRequest.builder()
+                            .command("analytics")
+                            .mode("summary")
+                            .baseOutput(output)
+                            .context(context)
+                            .apiKey(openAiKey)
+                            .build());
+            if (aiResult.successful() && aiResult.insight() != null && !aiResult.insight().isBlank()) {
+                System.out.println();
+                System.out.println("=== GPT-4 Insight ===");
+                System.out.println(aiResult.insight());
+            } else if (!aiResult.successful() && aiResult.message() != null && !aiResult.message().isBlank()) {
+                System.out.println();
+                System.out.println("[Intelligent mode] " + aiResult.message());
+            }
+        }
+
         return 0;
     }
 

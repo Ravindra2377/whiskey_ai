@@ -15,6 +15,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -24,10 +25,14 @@ import java.util.function.Consumer;
 public final class WelcomeView {
     private final StackPane view;
     private final Button primaryAction;
-    private final Runnable primaryActionCallback;
+    private final Consumer<GenerationIntent> generationHandler;
+    private final Runnable voiceHandler;
 
-    public WelcomeView(Consumer<String> statusNotifier, Runnable primaryActionHandler) {
-        this.primaryActionCallback = primaryActionHandler;
+    public WelcomeView(Consumer<String> statusNotifier,
+                       Consumer<GenerationIntent> generationHandler,
+                       Runnable voiceHandler) {
+        this.generationHandler = generationHandler;
+        this.voiceHandler = voiceHandler;
         this.view = new StackPane();
         this.view.getStyleClass().add("welcome-view");
 
@@ -73,12 +78,19 @@ public final class WelcomeView {
         primary.setMinWidth(220);
         primary.setOnAction(e -> {
             statusNotifier.accept("Launching AI application generation studio");
-            primaryActionCallback.run();
+            if (generationHandler != null) {
+                generationHandler.accept(GenerationIntent.primaryAction());
+            }
         });
 
         Button secondary = new Button("Open Voice Assistant");
         secondary.getStyleClass().add("secondary-action");
-        secondary.setOnAction(e -> statusNotifier.accept("Voice assistant interface will surface soon"));
+        secondary.setOnAction(e -> {
+            statusNotifier.accept("Voice assistant interface opening");
+            if (voiceHandler != null) {
+                voiceHandler.run();
+            }
+        });
 
         HBox actions = new HBox(12, primary, secondary);
         actions.setAlignment(Pos.CENTER_LEFT);
@@ -99,30 +111,43 @@ public final class WelcomeView {
         columnConstraints.setPercentWidth(50);
         grid.getColumnConstraints().addAll(columnConstraints, columnConstraints);
 
-        grid.add(createFeatureCard("Natural Language to Code",
-                "Transform plain language requirements into engineered solutions.",
-                "Replace 6 months of work with 5 minutes of AI collaboration.",
-                statusNotifier), 0, 0);
+    grid.add(createFeatureCard("Natural Language to Code",
+        "Transform plain language requirements into engineered solutions.",
+        "Replace 6 months of work with 5 minutes of AI collaboration.",
+        statusNotifier,
+        "Create a modern SaaS platform with secure auth and analytics dashboards from natural language requirements.",
+        List.of("natural-language", "analytics", "secure-auth")), 0, 0);
 
-        grid.add(createFeatureCard("Full-Stack Generation",
-                "Generate frontend, backend, and database in one flow.",
-                "React, Spring Boot, PostgreSQL, Docker & more.",
-                statusNotifier), 1, 0);
+    grid.add(createFeatureCard("Full-Stack Generation",
+        "Generate frontend, backend, and database in one flow.",
+        "React, Spring Boot, PostgreSQL, Docker & more.",
+        statusNotifier,
+        "Produce a full-stack web portal with React frontend, Spring Boot APIs, and PostgreSQL schema including Docker Compose deployment.",
+        List.of("full-stack", "react", "spring-boot", "postgresql", "docker")), 1, 0);
 
-        grid.add(createFeatureCard("Company Integration",
-                "Connect to enterprise infrastructure and deployment targets.",
-                "Single-click deployment to company Kubernetes or VM clusters.",
-                statusNotifier), 0, 1);
+    grid.add(createFeatureCard("Company Integration",
+        "Connect to enterprise infrastructure and deployment targets.",
+        "Single-click deployment to company Kubernetes or VM clusters.",
+        statusNotifier,
+        "Build an integration service that connects to internal HR systems, synchronises data, and exposes secured APIs for downstream teams.",
+        List.of("company-integration", "security", "data-sync")), 0, 1);
 
-        grid.add(createFeatureCard("5-Minute Delivery",
-                "Deliver production-ready solutions in minutes.",
-                "Automated compliance, security checks, and deployment scripts.",
-                statusNotifier), 1, 1);
+    grid.add(createFeatureCard("5-Minute Delivery",
+        "Deliver production-ready solutions in minutes.",
+        "Automated compliance, security checks, and deployment scripts.",
+        statusNotifier,
+        "Assemble a rapid delivery toolkit with CI/CD pipeline, infrastructure-as-code templates, and compliance automation scripts.",
+        List.of("delivery", "ci-cd", "compliance", "infrastructure")), 1, 1);
 
         return grid;
     }
 
-    private VBox createFeatureCard(String heading, String description, String caption, Consumer<String> notifier) {
+    private VBox createFeatureCard(String heading,
+                   String description,
+                   String caption,
+                   Consumer<String> notifier,
+                   String seedDescription,
+                   List<String> featureTags) {
         Label title = new Label(heading);
         title.getStyleClass().add("feature-card-title");
 
@@ -136,7 +161,12 @@ public final class WelcomeView {
 
         Button explore = new Button("Explore");
         explore.getStyleClass().add("ghost-button");
-        explore.setOnAction(e -> notifier.accept(heading + " experience is scheduled for Phase 2 rollout"));
+        explore.setOnAction(e -> {
+            notifier.accept("Launching template: " + heading);
+            if (generationHandler != null) {
+                generationHandler.accept(GenerationIntent.featureCard(seedDescription, featureTags));
+            }
+        });
 
         VBox card = new VBox(10, title, body, footer, explore);
         card.getStyleClass().add("feature-card");

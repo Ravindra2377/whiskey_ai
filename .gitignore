@@ -9,6 +9,7 @@ target/
 tools/
 gradle-*-bin.zip
 gradle-*/
+generated-apps/
 *.class
 *.log
 *.iml

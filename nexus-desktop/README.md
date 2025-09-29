@@ -11,6 +11,8 @@ host future AI-driven workflows.
 - **Professional chrome:** menu bar, command toolbar, status/progress area
 - **Workspace navigation:** quick access to workspaces and enterprise tasks
 - **Welcome surface:** IDE-style landing page with action cards and quick links
+- **GPT-4 generation:** the `Generate` button now invokes OpenAI GPT-4 to deliver full project scaffolds written to `generated-apps/`
+- **Voice-to-app:** record a spoken brief and Whisper + GPT-4 will produce the matching project blueprint
 - **Insight rail:** contextual panes for pipeline, infrastructure, and activity
 - **Status telemetry:** live clock, environment indicator, and activity ticker
 - **Custom theming:** modern enterprise styling tuned for dark UI environments
@@ -64,6 +66,25 @@ Alternatively execute the shaded jar (JavaFX modules must be on the module path)
 ```powershell
 java -jar target/nexus-desktop-0.1.0-SNAPSHOT.jar
 ```
+
+## GPT-4 application generation
+
+1. Supply an OpenAI API key (GPT-4o/GPT-4 access):
+	```powershell
+	setx OPENAI_API_KEY "sk-your-key"  # restart the shell after running
+	```
+	The desktop also prompts for the key on first use and stores it only in-memory for the current session.
+2. Launch the desktop app and press **Generate** (or any feature card) on the welcome surface.
+3. Describe your application, choose optional stack/tags, and confirm.
+4. Generated assets land in `generated-apps/<timestamp>-<project-name>/` with a `GENERATION_SUMMARY.md` audit file.
+
+## Voice-to-app workflow
+
+1. Ensure the same OpenAI key is present (for both Whisper and GPT-4).
+2. Click the **Voice** toolbar button and record a short requirement statement.
+3. After transcription, the generator pre-fills the dialog with your transcript so you can refine and launch the build.
+
+The activity console and insight rail stream status updates from GPT-4 and Whisper during every run.
 
 ### Configuring the CLI bridge
 

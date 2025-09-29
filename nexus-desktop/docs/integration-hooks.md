@@ -27,17 +27,18 @@ desktop, and future browser experiences.
 
 | Hook | Desktop Trigger | Backend Action | Transport | Notes |
 |------|-----------------|----------------|-----------|-------|
-| AI Generation | "Generate" toolbar button & menu item | `java -jar nexus.jar generate --plan current` | Local process | Capture stdout/stderr and stream into a new "Activity" console pane |
-| Voice Assistant | "Voice" toolbar button & menu item | `java -jar nexus.jar voice --live` | Local process | Spawn headless CLI window; pipe status to a dedicated dialog |
+| AI Generation | "Generate" toolbar button, welcome cards | OpenAI GPT-4 (chat completions) → write project scaffold | HTTPS (direct OpenAI API) | Streams status to console, persists artefacts under `generated-apps/` |
+| Voice Assistant | "Voice" toolbar button | Whisper transcription + GPT-4 generation | HTTPS (OpenAI API) | Voice capture dialog records WAV, routes transcript through generator |
 | Environment Connect | "Connect to Company Server" | `java -jar nexus.jar env connect` | Local process | Update environment badge based on exit code |
 | Health Check | "Health" toolbar button | `java -jar nexus.jar doctor --json` | Local process | Parse JSON to hydrate diagnostics pane |
 
 Implementation checklist:
 
-- Introduce a `BackendProcessService` that wraps `ProcessBuilder` for the CLI jar.
+- Introduce a `BackendProcessService` that wraps `ProcessBuilder` for the CLI jar. ✅
 - Surface cancellable tasks via JavaFX `Service`/`Task` classes.
-- Route streamed output to observable buffers bound to the insights panel.
-- Add a CLI location picker so non-standard installs can still be targeted.
+- Route streamed output to observable buffers bound to the insights panel. ✅
+- Add a CLI location picker so non-standard installs can still be targeted. ✅
+- Configure GPT-4 and Whisper API clients with secure key prompts. ✅
 
 ## Phase 2 – Local services (3–4 sprints)
 

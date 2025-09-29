@@ -30,6 +30,7 @@ javafx {
 
 dependencies {
     // JavaFX dependencies are supplied by the plugin
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
 }
 
 tasks.withType<JavaCompile> {

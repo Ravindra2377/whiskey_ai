@@ -2,8 +2,17 @@ package com.boozer.nexus.desktop.ui;
 
 import com.boozer.nexus.desktop.backend.BackendProcessService;
 import com.boozer.nexus.desktop.backend.CliPreferences;
+import com.boozer.nexus.desktop.backend.GPT4IntegrationService;
+import com.boozer.nexus.desktop.backend.GeneratedProjectWriter;
+import com.boozer.nexus.desktop.backend.GenerationSource;
+import com.boozer.nexus.desktop.backend.ProjectGenerationRequest;
+import com.boozer.nexus.desktop.backend.ProjectGenerationResult;
+import com.boozer.nexus.desktop.backend.VoiceToTextService;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Application;
+import javafx.stage.Stage;
+import com.boozer.nexus.desktop.ui.SplashScreen;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -17,16 +26,19 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import com.boozer.nexus.desktop.ui.AnalyticsDashboardView;
 import javafx.scene.control.Separator;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.PasswordField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,15 +53,39 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Builds the primary desktop layout including top menu/tool bar, navigation,
  * main workspace, contextual insights and status bar.
  */
 public class DesktopShell {
+    /**
+     * Launches the desktop shell with splash screen animation.
+     */
+    public static class Launcher extends Application {
+        @Override
+        public void start(Stage primaryStage) {
+            SplashScreen splash = new SplashScreen(() -> {
+                DesktopShell shell = new DesktopShell();
+                Scene scene = new Scene(shell.getRoot(), 1280, 800);
+                primaryStage.setScene(scene);
+                primaryStage.setTitle("NEXUS AI Desktop");
+                primaryStage.show();
+                shell.focusWelcomePrimaryAction();
+            });
+            splash.show();
+        }
+        public static void main(String[] args) {
+            launch(args);
+        }
+    }
     private final BorderPane root = new BorderPane();
     private final Label statusText = new Label("Ready. Welcome to NEXUS AI Desktop.");
     private final Label environmentText = new Label("Environment: Not connected");
@@ -69,6 +105,10 @@ public class DesktopShell {
     private final ConsoleView consoleView = new ConsoleView();
     private final Map<String, BackendProcessService.BackendJob> activeJobs = new HashMap<>();
     private final boolean ownsBackendService;
+    private final Path workspaceRoot;
+    private final GPT4IntegrationService gpt4Service = new GPT4IntegrationService();
+    private final GeneratedProjectWriter projectWriter;
+    private final AtomicBoolean generationInProgress = new AtomicBoolean(false);
 
     public DesktopShell() {
         this(new BackendProcessService(), true);
@@ -81,7 +121,9 @@ public class DesktopShell {
     private DesktopShell(BackendProcessService backendService, boolean ownsBackendService) {
         this.backendService = Objects.requireNonNull(backendService, "backendService");
         this.ownsBackendService = ownsBackendService;
-        this.welcomeView = new WelcomeView(this::updateStatus, this::onPrimaryActionRequested);
+    this.workspaceRoot = Paths.get("").toAbsolutePath();
+    this.projectWriter = new GeneratedProjectWriter(workspaceRoot);
+    this.welcomeView = new WelcomeView(this::updateStatus, this::triggerGenerationFlow, this::triggerVoiceGeneration);
 
         root.getStyleClass().add("root-pane");
         root.setPadding(new Insets(0));
@@ -122,6 +164,188 @@ public class DesktopShell {
         return container;
     }
 
+    private void showAnalyticsDashboard() {
+        updateStatus("Loading workspaces...");
+        List<String> workspaceArgs = List.of("workspaces");
+        StringBuilder workspaceOutput = new StringBuilder();
+        BackendProcessService.BackendCallbacks workspaceCallbacks = BackendProcessService.BackendCallbacks.builder()
+            .onStatus(this::updateStatus)
+            .onStdout(line -> workspaceOutput.append(line).append("\n"))
+            .onComplete(exit -> {
+                List<String> workspaces = new java.util.ArrayList<>();
+                String[] lines = workspaceOutput.toString().split("\n");
+                for (String line : lines) {
+                    if (line.contains("\t")) {
+                        String[] parts = line.split("\t");
+                        if (parts.length == 2) {
+                            workspaces.add(parts[1]); // displayName
+                        }
+                    }
+                }
+                if (workspaces.isEmpty()) workspaces.add("Default Workspace");
+                updateStatus("Loading analytics for " + workspaces.get(0) + "...");
+                List<String> analyticsArgs = List.of("analytics");
+                StringBuilder analyticsOutput = new StringBuilder();
+                BackendProcessService.BackendCallbacks analyticsCallbacks = BackendProcessService.BackendCallbacks.builder()
+                    .onStatus(this::updateStatus)
+                    .onStdout(line -> analyticsOutput.append(line).append("\n"))
+                    .onComplete(aExit -> {
+                        Map<String, Number> typeCounts = new java.util.HashMap<>();
+                        Map<String, Number> tagCounts = new java.util.HashMap<>();
+                        String[] aLines = analyticsOutput.toString().split("\n");
+                        boolean inType = false, inTag = false;
+                        for (String line : aLines) {
+                            if (line.trim().startsWith("By type:")) {
+                                inType = true; inTag = false; continue;
+                            }
+                            if (line.trim().startsWith("Top tags:")) {
+                                inType = false; inTag = true; continue;
+                            }
+                            if (line.trim().isEmpty() || line.trim().startsWith("Total operations") || line.trim().startsWith("Analytics for catalog")) {
+                                inType = false; inTag = false; continue;
+                            }
+                            if (inType) {
+                                String[] parts = line.trim().split("\\s+");
+                                if (parts.length == 2) {
+                                    typeCounts.put(parts[0], Integer.parseInt(parts[1]));
+                                }
+                            }
+                            if (inTag) {
+                                String[] parts = line.trim().split("\\s+");
+                                if (parts.length == 2) {
+                                    tagCounts.put(parts[0], Integer.parseInt(parts[1]));
+                                }
+                            }
+                        }
+                        Platform.runLater(() -> {
+                            AnalyticsDashboardView dashboard = new AnalyticsDashboardView(
+                                workspaces,
+                                typeCounts,
+                                tagCounts,
+                                () -> exportAnalyticsCSV(typeCounts, tagCounts)
+                            );
+                            dashboard.getWorkspaceSelector().setOnAction(e -> {
+                                String selectedWorkspace = dashboard.getWorkspaceSelector().getSelectionModel().getSelectedItem();
+                                updateStatus("Loading analytics for " + selectedWorkspace + "...");
+                                // Pass workspace code to analytics CLI for filtering
+                                String workspaceCodeArg = "--workspace=" + selectedWorkspace.replaceAll(" ", "_").toLowerCase();
+                                List<String> analyticsArgs = List.of("analytics", workspaceCodeArg);
+                                StringBuilder analyticsOutput = new StringBuilder();
+                                BackendProcessService.BackendCallbacks analyticsCallbacks = BackendProcessService.BackendCallbacks.builder()
+                                    .onStatus(this::updateStatus)
+                                    .onStdout(line -> analyticsOutput.append(line).append("\n"))
+                                    .onComplete(aExit -> {
+                                        Map<String, Number> typeCounts2 = new java.util.HashMap<>();
+                                        Map<String, Number> tagCounts2 = new java.util.HashMap<>();
+                                        String[] aLines2 = analyticsOutput.toString().split("\n");
+                                        boolean inType2 = false, inTag2 = false;
+                                        for (String line2 : aLines2) {
+                                            if (line2.trim().startsWith("By type:")) {
+                                                inType2 = true; inTag2 = false; continue;
+                                            }
+                                            if (line2.trim().startsWith("Top tags:")) {
+                                                inType2 = false; inTag2 = true; continue;
+                                            }
+                                            if (line2.trim().isEmpty() || line2.trim().startsWith("Total operations") || line2.trim().startsWith("Analytics for catalog")) {
+                                                inType2 = false; inTag2 = false; continue;
+                                            }
+                                            if (inType2) {
+                                                String[] parts2 = line2.trim().split("\\s+");
+                                                if (parts2.length == 2) {
+                                                    typeCounts2.put(parts2[0], Integer.parseInt(parts2[1]));
+                                                }
+                                            }
+                                            if (inTag2) {
+                                                String[] parts2 = line2.trim().split("\\s+");
+                                                if (parts2.length == 2) {
+                                                    tagCounts2.put(parts2[0], Integer.parseInt(parts2[1]));
+                                                }
+                                            }
+                                        }
+                                        Platform.runLater(() -> {
+                                            dashboard.updateAnalytics(typeCounts2, tagCounts2);
+                                            updateStatus("Analytics dashboard loaded for " + selectedWorkspace);
+                                        });
+                                    })
+                                    .onFailure(ex2 -> {
+                                        updateStatus("Failed to load analytics: " + ex2.getMessage());
+                                    })
+                                    .build();
+                                backendService.runCliCommand("analytics", analyticsArgs, analyticsCallbacks);
+                            });
+                            root.setCenter(dashboard.getView());
+                            updateStatus("Analytics dashboard loaded");
+                        });
+                    })
+                    .onFailure(ex -> {
+                        updateStatus("Failed to load analytics: " + ex.getMessage());
+                    })
+                    .build();
+                backendService.runCliCommand("analytics", analyticsArgs, analyticsCallbacks);
+            })
+            .onFailure(ex -> {
+                updateStatus("Failed to load workspaces: " + ex.getMessage());
+            })
+            .build();
+        backendService.runCliCommand("workspaces", workspaceArgs, workspaceCallbacks);
+    }
+
+    // Temporary storage for parsed analytics
+    private final List<String> analyticsWorkspaces = new java.util.ArrayList<>();
+    private final Map<String, Number> analyticsTypeCounts = new java.util.HashMap<>();
+    private final Map<String, Number> analyticsTagCounts = new java.util.HashMap<>();
+
+    private void handleAnalyticsOutput(String line) {
+        // Parse CLI output for dashboard
+        if (line.startsWith("Analytics for catalog:")) {
+            analyticsWorkspaces.clear();
+            analyticsTypeCounts.clear();
+            analyticsTagCounts.clear();
+        }
+        if (line.startsWith("By type:")) {
+            // Next lines are type counts
+            return;
+        }
+        if (line.matches("\s+\w+\s+\d+")) {
+            String[] parts = line.trim().split("\\s+");
+            if (analyticsTypeCounts.isEmpty() || analyticsTagCounts.isEmpty()) {
+                analyticsTypeCounts.put(parts[0], Integer.parseInt(parts[1]));
+            }
+        }
+        if (line.startsWith("Top tags:")) {
+            // Next lines are tag counts
+            return;
+        }
+        if (line.matches("\s+\w+\s+\d+")) {
+            String[] parts = line.trim().split("\\s+");
+            analyticsTagCounts.put(parts[0], Integer.parseInt(parts[1]));
+        }
+        // When done parsing, show dashboard
+        if (line.contains("Timeline (stub):")) {
+            AnalyticsDashboardView dashboard = new AnalyticsDashboardView(
+                analyticsWorkspaces.isEmpty() ? List.of("Default Workspace") : analyticsWorkspaces,
+                analyticsTypeCounts,
+                analyticsTagCounts,
+                () -> exportAnalyticsCSV(analyticsTypeCounts, analyticsTagCounts)
+            );
+            root.setCenter(dashboard.getView());
+        }
+    }
+
+    private void exportAnalyticsCSV(Map<String, Number> typeCounts, Map<String, Number> tagCounts) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Type,Count\n");
+        typeCounts.forEach((type, count) -> sb.append(type).append(",").append(count).append("\n"));
+        sb.append("\nTag,Count\n");
+        tagCounts.forEach((tag, count) -> sb.append(tag).append(",").append(count).append("\n"));
+        try {
+            java.nio.file.Files.writeString(java.nio.file.Path.of("analytics-export.csv"), sb.toString());
+            updateStatus("Analytics exported to analytics-export.csv");
+        } catch (Exception ex) {
+            updateStatus("Export failed: " + ex.getMessage());
+        }
+    }
+
     private MenuBar createMenuBar() {
         Menu fileMenu = new Menu("File");
         MenuItem newProject = new MenuItem("New Project…");
@@ -130,19 +354,19 @@ public class DesktopShell {
         openProject.setOnAction(e -> updateStatus("Opening project selector"));
         MenuItem preferences = new MenuItem("Preferences");
         preferences.setOnAction(e -> updateStatus("Preferences dialog coming soon"));
-    MenuItem cliLocation = new MenuItem("Set NEXUS CLI Location…");
-    cliLocation.setOnAction(e -> openCliLocationChooser());
+        MenuItem cliLocation = new MenuItem("Set NEXUS CLI Location…");
+        cliLocation.setOnAction(e -> openCliLocationChooser());
         MenuItem exit = new MenuItem("Exit");
         exit.setOnAction(e -> Platform.exit());
-    fileMenu.getItems().addAll(newProject, openProject, preferences, cliLocation, new SeparatorMenuItem(), exit);
+        fileMenu.getItems().addAll(newProject, openProject, preferences, cliLocation, new SeparatorMenuItem(), exit);
 
         Menu generateMenu = new Menu("Generate");
         MenuItem generateApp = new MenuItem("Generate Application");
-        generateApp.setOnAction(e -> triggerGenerationPrep());
+        generateApp.setOnAction(e -> triggerGenerationFlow(GenerationIntent.primaryAction()));
         MenuItem templateGallery = new MenuItem("Open Template Gallery");
         templateGallery.setOnAction(e -> updateStatus("Loading full-stack template previews"));
         MenuItem voiceGen = new MenuItem("Voice-Powered Session");
-        voiceGen.setOnAction(e -> launchVoiceWorkflow());
+        voiceGen.setOnAction(e -> triggerVoiceGeneration());
         generateMenu.getItems().addAll(generateApp, templateGallery, voiceGen);
 
         Menu companyMenu = new Menu("Company");
@@ -158,10 +382,12 @@ public class DesktopShell {
         MenuItem documentation = new MenuItem("View Documentation");
         documentation.setOnAction(e -> updateStatus("Opening documentation in browser"));
         MenuItem diagnostics = new MenuItem("Run Diagnostics");
-    diagnostics.setOnAction(e -> runDiagnosticsSweep());
+        diagnostics.setOnAction(e -> runDiagnosticsSweep());
+        MenuItem analyticsDashboard = new MenuItem("Analytics Dashboard");
+        analyticsDashboard.setOnAction(e -> showAnalyticsDashboard());
         MenuItem about = new MenuItem("About NEXUS AI Desktop");
         about.setOnAction(e -> updateStatus("NEXUS AI Desktop 0.1.0 – Enterprise Preview"));
-        helpMenu.getItems().addAll(documentation, diagnostics, new SeparatorMenuItem(), about);
+        helpMenu.getItems().addAll(documentation, diagnostics, analyticsDashboard, new SeparatorMenuItem(), about);
 
         MenuBar menuBar = new MenuBar(fileMenu, generateMenu, companyMenu, helpMenu);
         menuBar.getStyleClass().add("menu-bar");
@@ -172,9 +398,9 @@ public class DesktopShell {
         Button newProjectButton = primaryToolbarButton("New", "Create a new AI project", () ->
                 updateStatus("New AI-assisted project creation starting"));
         Button generateButton = primaryToolbarButton("Generate", "Launch AI code generation", () ->
-        triggerGenerationPrep());
+    triggerGenerationFlow(GenerationIntent.primaryAction()));
         Button voiceButton = primaryToolbarButton("Voice", "Open voice development assistant", () ->
-        launchVoiceWorkflow());
+    triggerVoiceGeneration());
         Button deployButton = primaryToolbarButton("Deploy", "Deploy to enterprise infrastructure", () ->
                 updateStatus("Preparing enterprise deployment pipeline"));
     Button healthButton = primaryToolbarButton("Health", "Check backend availability", this::runBackendHealthCheck);
@@ -336,10 +562,6 @@ public class DesktopShell {
         Platform.runLater(() -> statusText.setText(message));
     }
 
-    private void onPrimaryActionRequested() {
-        updateStatus("AI application generator is queued for implementation");
-    }
-
     private void openCliLocationChooser() {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Select NEXUS CLI Jar");
@@ -400,111 +622,185 @@ public class DesktopShell {
         }
     }
 
-    private void triggerGenerationPrep() {
-        if (!backendService.isCliAvailable()) {
-            String message = "NEXUS CLI jar missing (" + backendService.describeCliLocation() + ")";
-            updateStatus(message);
-            updateInsightLabel(pipelineStatusLabel, "CLI unavailable – build the backend module");
-            appendActivity("Generation skipped: CLI jar not found");
-            consoleView.appendError(message);
+    private void triggerGenerationFlow(GenerationIntent intent) {
+        GenerationIntent safeIntent = intent != null ? intent : GenerationIntent.primaryAction();
+        Optional<GenerationDialog.Result> dialogResult = GenerationDialog.show(root, safeIntent);
+        if (dialogResult.isEmpty()) {
+            consoleView.appendInfo("Generation cancelled by user");
+            appendActivity("Generation cancelled");
             return;
         }
 
-        updateStatus("Launching operations catalog summary via CLI…");
-        updateInsightLabel(pipelineStatusLabel, "Catalog summary running…");
-        appendActivity("Running `catalog summary` via CLI");
-        List<String> args = List.of("catalog", "summary");
-        logCommand("catalog summary", args);
-
-        BackendProcessService.BackendCallbacks callbacks = BackendProcessService.BackendCallbacks.builder()
-                .onStatus(this::updateStatus)
-                .onStdout(line -> {
-                    updateInsightLabel(pipelineStatusLabel, "Catalog: " + truncate(line, 70));
-                    appendActivity("catalog: " + truncate(line, 80));
-                    consoleView.appendStdout("catalog", line);
-                })
-                .onStderr(line -> {
-                    updateInsightLabel(pipelineStatusLabel, "Catalog error: " + truncate(line, 70));
-                    appendActivity("catalog (err): " + truncate(line, 80));
-                    consoleView.appendStderr("catalog", line);
-                })
-                .onComplete(exit -> {
-                    if (exit == 0) {
-                        updateStatus("Catalog summary completed successfully.");
-                        updateInsightLabel(pipelineStatusLabel, "Catalog summary complete");
-                        consoleView.appendInfo("catalog summary completed successfully");
-                    } else {
-                        updateStatus("Catalog summary exited with code " + exit + ".");
-                        updateInsightLabel(pipelineStatusLabel, "Completed with exit " + exit);
-                        appendActivity("catalog exit code: " + exit);
-                        consoleView.appendWarning("catalog summary exited with code " + exit);
-                    }
-                })
-                .onFailure(ex -> {
-                    String error = ex.getMessage() == null ? "unknown error" : ex.getMessage();
-                    updateStatus("Unable to run catalog summary: " + error);
-                    updateInsightLabel(pipelineStatusLabel, "Failure: " + truncate(error, 70));
-                    appendActivity("catalog failure: " + truncate(error, 80));
-                    consoleView.appendError("catalog summary failed: " + error);
-                })
-                .build();
-
-        cancelActiveJob("catalog");
-        BackendProcessService.BackendJob job = backendService.runCliCommand("catalog summary", args, callbacks);
-        registerJob("catalog", job);
-    }
-
-    private void launchVoiceWorkflow() {
-        if (!backendService.isCliAvailable()) {
-            String message = "NEXUS CLI jar missing (" + backendService.describeCliLocation() + ")";
-            updateStatus(message);
-            updateInsightLabel(voiceStatusLabel, "Voice diagnostics unavailable – build CLI");
-            appendActivity("Voice check skipped: CLI jar not found");
-            consoleView.appendError(message);
+        GenerationDialog.Result form = dialogResult.get();
+        if (!ensureApiKey()) {
+            updateStatus("OpenAI API key required for code generation");
+            consoleView.appendWarning("Generation aborted – missing OpenAI API key");
+            updateInsightLabel(pipelineStatusLabel, "Configure OpenAI API key to run generation");
             return;
         }
 
-        updateStatus("Running voice configuration diagnostics via CLI…");
-        updateInsightLabel(voiceStatusLabel, "Voice diagnostics running…");
-        appendActivity("Running `voice --check-config`");
-        List<String> args = List.of("voice", "--check-config");
-        logCommand("voice configuration check", args);
+        if (!generationInProgress.compareAndSet(false, true)) {
+            updateStatus("A generation job is already running – please wait");
+            consoleView.appendWarning("Ignored additional generation request while one is active");
+            return;
+        }
 
-        BackendProcessService.BackendCallbacks callbacks = BackendProcessService.BackendCallbacks.builder()
-                .onStatus(this::updateStatus)
-                .onStdout(line -> {
-                    updateInsightLabel(voiceStatusLabel, truncate(line, 80));
-                    appendActivity("voice: " + truncate(line, 80));
-                    consoleView.appendStdout("voice", line);
-                })
-                .onStderr(line -> {
-                    updateInsightLabel(voiceStatusLabel, "Warning: " + truncate(line, 70));
-                    appendActivity("voice (err): " + truncate(line, 80));
-                    consoleView.appendStderr("voice", line);
-                })
-                .onComplete(exit -> {
-                    if (exit == 0) {
-                        updateStatus("Voice configuration verified.");
-                        consoleView.appendInfo("voice diagnostics completed successfully");
-                    } else {
-                        updateStatus("Voice diagnostics exited with code " + exit + ". Check activity feed for details.");
-                        appendActivity("voice exit code: " + exit);
-                        consoleView.appendWarning("voice diagnostics exited with code " + exit);
-                    }
-                })
-                .onFailure(ex -> {
-                    String error = ex.getMessage() == null ? "unknown error" : ex.getMessage();
-                    updateStatus("Voice workflow failed: " + error);
-                    updateInsightLabel(voiceStatusLabel, "Failure: " + truncate(error, 70));
-                    appendActivity("voice failure: " + truncate(error, 80));
-                    consoleView.appendError("voice diagnostics failed: " + error);
-                })
-                .build();
+        ProjectGenerationRequest.Builder builder = ProjectGenerationRequest.builder()
+                .description(form.description())
+                .includeTests(form.includeTests())
+                .featureTags(form.featureTags())
+                .source(safeIntent.getSource());
+        if (form.projectNameHint() != null && !form.projectNameHint().isBlank()) {
+            builder.projectNameHint(form.projectNameHint());
+        }
+        if (form.targetStack() != null && !form.targetStack().isBlank()) {
+            builder.targetStack(form.targetStack());
+        }
 
-        cancelActiveJob("voice");
-        BackendProcessService.BackendJob job = backendService.runCliCommand("voice configuration check", args, callbacks);
-        registerJob("voice", job);
+        ProjectGenerationRequest request = builder.build();
+
+        updateStatus("Contacting GPT-4 for enterprise build…");
+        updateInsightLabel(pipelineStatusLabel, "GPT-4 generation running…");
+        appendActivity("GPT-4 generation started");
+        consoleView.appendCommand("gpt4 → " + truncate(form.description(), 120));
+
+        CompletableFuture<ProjectGenerationResult> future = gpt4Service.generateProject(request);
+        future.thenApply(result -> {
+            try {
+                Path projectDir = projectWriter.write(result);
+                return new GenerationOutcome(result, projectDir);
+            } catch (IOException ex) {
+                throw new RuntimeException("Failed to write generated project: " + ex.getMessage(), ex);
+            }
+        }).whenComplete((outcome, throwable) -> {
+            generationInProgress.set(false);
+            if (throwable != null) {
+                Throwable cause = throwable.getCause() != null ? throwable.getCause() : throwable;
+                Platform.runLater(() -> handleGenerationFailure(cause));
+            } else if (outcome != null) {
+                Platform.runLater(() -> handleGenerationSuccess(outcome));
+            }
+        });
     }
+
+    private void triggerVoiceGeneration() {
+        if (!ensureApiKey()) {
+            updateStatus("OpenAI API key required for voice workflows");
+            consoleView.appendWarning("Voice workflow aborted – API key missing");
+            updateInsightLabel(voiceStatusLabel, "Provide OpenAI key to enable voice-to-app");
+            return;
+        }
+
+        VoiceCaptureDialog.capture(root).ifPresent(audio -> startVoiceToAppFlow(audio));
+    }
+
+    private void handleGenerationSuccess(GenerationOutcome outcome) {
+        ProjectGenerationResult result = outcome.result();
+        Path directory = outcome.projectDir();
+        String relative = relativize(directory);
+
+        String message = "Project generated: " + result.getProjectName() + " (" + relative + ")";
+        updateStatus(message);
+        updateInsightLabel(pipelineStatusLabel, "Project ready → " + truncate(relative, 60));
+        appendActivity("GPT-4 generated " + result.getProjectName());
+        consoleView.appendInfo("Project written to " + directory.toAbsolutePath());
+        if (!result.getSummary().isBlank()) {
+            consoleView.appendInfo("Summary → " + result.getSummary());
+        }
+        if (result.hasNotes()) {
+            result.getNotes().forEach(note -> consoleView.appendInfo("Note → " + note));
+        }
+        updateInsightLabel(activityStatusLabel, "Generated " + truncate(result.getProjectName(), 70));
+    }
+
+    private void handleGenerationFailure(Throwable cause) {
+        String reason = cause.getMessage() == null ? cause.toString() : cause.getMessage();
+        updateStatus("Generation failed: " + reason);
+        updateInsightLabel(pipelineStatusLabel, "Generation failed – see console");
+        appendActivity("Generation failed: " + truncate(reason, 80));
+        consoleView.appendError("GPT-4 generation failed: " + reason);
+    }
+
+    private boolean ensureApiKey() {
+        if (gpt4Service.getApiKey().isPresent()) {
+            return true;
+        }
+        Optional<String> key = promptForApiKey();
+        key.ifPresent(gpt4Service::setApiKey);
+        return key.isPresent();
+    }
+
+    private Optional<String> promptForApiKey() {
+        javafx.scene.control.Dialog<String> dialog = new javafx.scene.control.Dialog<>();
+        dialog.setTitle("Configure OpenAI API Key");
+        dialog.setHeaderText("Enter your OpenAI API key to enable GPT-4 code generation.");
+        dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.OK, javafx.scene.control.ButtonType.CANCEL);
+
+        javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 10, 10, 10));
+
+        javafx.scene.control.Label label = new javafx.scene.control.Label("API Key");
+        PasswordField field = new PasswordField();
+        field.setPromptText("sk-...");
+
+        grid.add(label, 0, 0);
+        grid.add(field, 1, 0);
+
+        dialog.getDialogPane().setContent(grid);
+        Platform.runLater(field::requestFocus);
+
+        dialog.setResultConverter(button -> {
+            if (button == javafx.scene.control.ButtonType.OK) {
+                String value = field.getText();
+                if (value != null && !value.trim().isEmpty()) {
+                    return value.trim();
+                }
+            }
+            return null;
+        });
+
+        return dialog.showAndWait().map(String::trim).filter(s -> !s.isEmpty());
+    }
+
+    private String relativize(Path path) {
+        try {
+            Path relative = workspaceRoot.relativize(path.toAbsolutePath());
+            String text = relative.toString();
+            return text.isEmpty() ? path.toAbsolutePath().toString() : text;
+        } catch (IllegalArgumentException ex) {
+            return path.toAbsolutePath().toString();
+        }
+    }
+
+    private void startVoiceToAppFlow(byte[] audioData) {
+        updateStatus("Transcribing voice input with Whisper…");
+        updateInsightLabel(voiceStatusLabel, "Transcribing voice input…");
+        consoleView.appendCommand("voice-to-app → capturing transcript");
+
+        VoiceToTextService service = new VoiceToTextService(gpt4Service.getApiKey().orElse(null));
+        service.transcribeAsync(audioData).whenComplete((transcript, throwable) -> {
+            if (throwable != null || transcript == null || transcript.isBlank()) {
+                Throwable cause = throwable instanceof CompletionException ce && ce.getCause() != null ? ce.getCause() : throwable;
+                String reason = cause != null && cause.getMessage() != null ? cause.getMessage() : "No transcript";
+                Platform.runLater(() -> {
+                    updateStatus("Voice transcription failed: " + reason);
+                    updateInsightLabel(voiceStatusLabel, "Voice transcription failed");
+                    consoleView.appendError("Voice transcription failed: " + reason);
+                });
+                return;
+            }
+
+            Platform.runLater(() -> {
+                consoleView.appendInfo("Voice transcript → " + transcript);
+                updateInsightLabel(voiceStatusLabel, "Voice transcript captured");
+                triggerGenerationFlow(new GenerationIntent(transcript, List.of("voice-session"), GenerationSource.VOICE));
+            });
+        });
+    }
+
+    private record GenerationOutcome(ProjectGenerationResult result, Path projectDir) {}
 
     private void simulateEnvironmentConnection() {
         environmentText.setText("Environment: Connecting…");
@@ -638,6 +934,7 @@ public class DesktopShell {
             activeJobs.values().forEach(BackendProcessService.BackendJob::cancel);
             activeJobs.clear();
         }
+        gpt4Service.close();
         if (ownsBackendService) {
             try {
                 backendService.close();
